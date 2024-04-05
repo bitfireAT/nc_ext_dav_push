@@ -17,9 +17,9 @@ class SabrePluginAddListener implements IEventListener {
 
 	public function handle(Event $event): void {
 		if ($event instanceof SabrePluginAddEvent) {
-            $serviceDetectionPlugin = $this->container->get(ServiceDetectionPlugin::class);
+			$serviceDetectionPlugin = $this->container->get(ServiceDetectionPlugin::class);
 
-            $event->getServer()->addPlugin($serviceDetectionPlugin);
-        }
+			$event->getServer()->addPlugin($serviceDetectionPlugin);
+		}
 	}
 }

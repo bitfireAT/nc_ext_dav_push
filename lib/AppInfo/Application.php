@@ -21,10 +21,10 @@ class Application extends App implements IBootstrap {
 		parent::__construct(self::APP_ID);
 	}
 
-    public function register(IRegistrationContext $context): void {
-        $context->registerEventListener(SabrePluginAddEvent::class, SabrePluginAddListener::class);
-    }
+	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(SabrePluginAddEvent::class, SabrePluginAddListener::class);
+	}
 
-    public function boot(IBootContext $context): void {
-    }
+	public function boot(IBootContext $context): void {
+	}
 }

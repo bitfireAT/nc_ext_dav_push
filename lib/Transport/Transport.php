@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace OCA\DavPush\Transport;
 
 abstract class Transport {
-    protected $id;
+	protected $id;
 
-    public function getId() {
-        return $this->id;
-    }
+	public function getId() {
+		return $this->id;
+	}
 
-    public function getAdditionalInformation() {
-        return [];
-    }
+	public function getAdditionalInformation() {
+		return [];
+	}
 }

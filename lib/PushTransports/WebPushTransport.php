@@ -7,5 +7,5 @@ namespace OCA\DavPush\PushTransports;
 use OCA\DavPush\Transport\Transport;
 
 class WebPushTransport extends Transport {
-    protected $id = "web-push";
+	protected $id = "web-push";
 }
