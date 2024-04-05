@@ -41,7 +41,7 @@ use Sabre\DAV\ServerPlugin;
 class ServiceDetectionPlugin extends ServerPlugin {
 
 	public const PUSH_PREFIX = '{DAV:Push}';
-    public const PROPERTY_PUSH_TRANSPORTS = self::PUSH_PREFIX . 'push-transports';
+	public const PROPERTY_PUSH_TRANSPORTS = self::PUSH_PREFIX . 'push-transports';
 	public const PROPERTY_PUSH_TOPIC = self::PUSH_PREFIX . 'topic';
 
 
@@ -90,7 +90,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 			},
 		);
 
-        $propFind->handle(
+		$propFind->handle(
 			self::PROPERTY_PUSH_TOPIC,
 			//function () use ($node) {
 				//$user = $this->userSession->getUser();
@@ -100,7 +100,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 
 			//	return "test-return-push";
 			//},
-            "test-return-push-topic"
+			"test-return-push-topic"
 		);
 	}
 }
