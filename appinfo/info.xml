@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>dav_push</id>
+    <name>DAV Push</name>
+    <summary>Implements the DAV Push specification</summary>
+    <description><![CDATA[This app allows you to send push notifications from your Nextcloud server to different clients, including mobile devices, desktop computers, and web browsers.]]></description>
+    <version>0.0.1</version>
+    <licence>agpl</licence>
+    <author mail="info@bitfire.at" homepage="https://github.com/bitfireAT/webdav-push">bitfire web engineering</author>
+    <author mail="mail@jonathan-treffler.de">Jonathan Treffler</author>
+    <namespace>DavPush</namespace>
+    <category>tools</category>
+    <bugs>https://github.com/bitfireAT/nc-ext-caldav-carddav-push/issues</bugs>
+    <dependencies>
+        <nextcloud min-version="28" max-version="28"/>
+    </dependencies>
+</info>
