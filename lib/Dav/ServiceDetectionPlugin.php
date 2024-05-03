@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 /**
- * @copyright 2024 Christopher Ng <chrng8@gmail.com>
+ * @copyright 2024 Jonathan Treffler <mail@jonathan-treffler.de>
  *
+ * @author Jonathan Treffler <mail@jonathan-treffler.de>
  * @author Christopher Ng <chrng8@gmail.com>
  *
  * @license GNU AGPL version 3 or any later version
