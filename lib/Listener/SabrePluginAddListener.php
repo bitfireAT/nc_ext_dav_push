@@ -28,6 +28,7 @@ namespace OCA\DavPush\Listener;
 
 use OCA\DAV\Events\SabrePluginAddEvent;
 use OCA\DavPush\Dav\ServiceDetectionPlugin;
+use OCA\DavPush\Dav\SubscriptionManagementPlugin;
 
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -40,8 +41,10 @@ class SabrePluginAddListener implements IEventListener {
 	public function handle(Event $event): void {
 		if ($event instanceof SabrePluginAddEvent) {
 			$serviceDetectionPlugin = $this->container->get(ServiceDetectionPlugin::class);
+			$subscriptionManagementPlugin = $this->container->get(SubscriptionManagementPlugin::class);
 
 			$event->getServer()->addPlugin($serviceDetectionPlugin);
+			$event->getServer()->addPlugin($subscriptionManagementPlugin);
 		}
 	}
 }
