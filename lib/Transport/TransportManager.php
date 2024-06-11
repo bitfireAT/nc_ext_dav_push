@@ -32,9 +32,6 @@ use OCA\DavPush\Events\RegisterTransportsEvent;
 use OCA\DavPush\PushTransports\WebPushTransport;
 
 class TransportManager {
-	/**
-	 * @var Transport[]
-	 */
 	private array $transports = [];
 
 	public function __construct(IEventDispatcher $dispatcher) {
@@ -53,8 +50,15 @@ class TransportManager {
 		return $this->transports;
 	}
 
+	/**
+	 * @return Transport
+	 */
+	public function getTransport($id): ?Transport {
+		return $this->transports[$id];
+	}
+
 	public function registerTransport(Transport $transport): self {
-		$this->transports[] = $transport;
+		$this->transports[$transport->getId()] = $transport;
 		return $this;
 	}
 }
