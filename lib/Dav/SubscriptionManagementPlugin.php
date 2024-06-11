@@ -27,8 +27,12 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\Dav;
 
-use OCP\IUserSession;
+use OCA\DavPush\Transport\TransportManager;
+use OCA\DavPush\Db\Subscription;
+use OCA\DavPush\Db\SubscriptionMapper;
 
+use OCP\IUserSession;
+use OCP\IURLGenerator;
 use OCP\AppFramework\Http;
 
 use Sabre\DAV\Server;
@@ -43,6 +47,8 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 	public const PUSH_SUBSCRIPTION = self::PUSH_PREFIX . "subscription";
 	public const PUSH_EXPIRES = self::PUSH_PREFIX . "expires";
 
+	public const IMF_FIXDATE_FORMAT = "D, d M Y H:i:s O+";
+
 	/**
 	 * Reference to SabreDAV server object.
 	 *
@@ -52,6 +58,10 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 
 	public function __construct(
 		private IUserSession $userSession,
+		private TransportManager $transportManager,
+		private IURLGenerator $URLGenerator,
+		private SubscriptionMapper $subscriptionMapper,
+		private $userId,
 	) {
 	}
 
@@ -67,6 +77,8 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 		if (!(str_contains($contentType, 'application/xml') || str_contains($contentType, 'text/xml'))) {
 			return;
 		}
+
+		$node = $this->server->tree->getNodeForPath($this->server->getRequestUri());
 
 		$requestBody = $request->getBodyAsString();
 
@@ -100,8 +112,8 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 					} else {
 						$errors[] = "only one subscription allowed";
 					}
-				} elif($parameter["name"] == self::PUSH_EXPIRES && !$subscriptionExpires) {
-					$subscriptionExpires = $parameter["value"];
+				} elseif($parameter["name"] == self::PUSH_EXPIRES && !$subscriptionExpires) {
+					$subscriptionExpires = \DateTime::createFromFormat(self::IMF_FIXDATE_FORMAT, $parameter["value"]);
 				}
 			}
 
@@ -109,13 +121,51 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 				$errors[] = "no subscription included";
 			}
 
+			$transport = $this->transportManager->getTransport(preg_replace('/^\{DAV:Push\}/', '', $subscriptionType));
+
+			if($transport === null) {
+				$errors[] = $subscriptionType . " transport does not exist";
+			}
+
+			[
+				'success' => $registerSuccess,
+				'error' => $registerError,
+				'responseStatus' => $responseStatus,
+				'response' => $responseContent,
+				'unsubscribeLink' => $unsubscribeLink,
+				'data' => $data
+			] = $transport->registerSubscription($subscriptionOptions);
+
+			$responseStatus = $responseStatus ?? Http::STATUS_CREATED;
+			$data = $data ?? False;
+
+
+			if(!$registerSuccess) {
+				$errors[] = $registerError;
+			}
+
 			if(sizeof($errors) == 0) {
-				$response->setStatus(Http::STATUS_CREATED);
+				$response->setStatus($responseStatus);
+				
+				// create subscription entry in db
+				$subscription = new Subscription();
+				$subscription->setUserId($this->userId);
+				$subscription->setCollectionName($node->getName());
+				$subscription->setCreationTimestamp(time());
+				if(!$subscriptionExpires) {
+					$subscription->setExpirationTimestamp(0);
+				} else {
+					$subscription->setExpirationTimestamp($subscriptionExpires->getTimestamp());
+				}
+				$subscription->setData(json_encode($data));
+				$subscription = $this->subscriptionMapper->insert($subscription);
+				
+				// generate default unsubscribe link, unless transport requested a custom url
+				$unsubscribeLink = $unsubscribeLink ?? $this->URLGenerator->getAbsoluteURL("/apps/dav_push/subscriptions/" . $subscription->getId());
+				$response->setHeader("Location", $unsubscribeLink);
 
-				//$response->setBody($subscriptionType);
-				//$response->setBody(json_encode($parameters));
-
-				// pass data to applicable transport class
+				$xml = $this->server->xml->write(self::PUSH_REGISTER, $responseContent);
+				$response->setBody($xml);
 			} else {
 				$response->setStatus(Http::STATUS_BAD_REQUEST);
 

@@ -36,4 +36,6 @@ abstract class Transport {
 	public function getAdditionalInformation() {
 		return [];
 	}
+
+	abstract public function registerSubscription($options);
 }
