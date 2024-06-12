@@ -30,6 +30,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 
 use OCA\DavPush\Events\RegisterTransportsEvent;
 use OCA\DavPush\PushTransports\WebPushTransport;
+use OCA\DavPush\PushTransports\WebhookTransport;
 
 class TransportManager {
 	private array $transports = [];
@@ -37,6 +38,7 @@ class TransportManager {
 	public function __construct(IEventDispatcher $dispatcher) {
 		// register integrated transports
 		$this->registerTransport(new WebPushTransport());
+		$this->registerTransport(new WebhookTransport());
 
 		// register transports provided by other apps
 		$event = new RegisterTransportsEvent($this);

@@ -28,17 +28,41 @@ namespace OCA\DavPush\PushTransports;
 
 use OCA\DavPush\Transport\Transport;
 
-class WebPushTransport extends Transport {
-	protected $id = "web-push";
+class WebhookTransport extends Transport {
+	protected $id = "webhook";
 
 	public function registerSubscription($options) {
-		return [
-			'success' => True,
-			'response' => "web push test",
-		];
+		$url = False;
+
+		foreach($options as $option) {
+			if($option["name"] == "{DAV:Push}endpoint") {
+				$url = $option["value"];
+			}
+		}
+
+		if($url) {
+			return [
+				'success' => True,
+				'response' => "",
+				'data' => [ "url" => $url ],
+			];
+		} else {
+			return [
+				'success' => False,
+				'error' => "webhook url not provided",
+			];
+		}
 	}
 
 	public function notify(string $userId, string $collectionName, $data) {
+		$options = [
+			'http' => [
+				'method' => 'POST',
+				'content' => "Collection " . $collectionName . "has been changed",
+			],
+		];
 
+		$context = stream_context_create($options);
+		$result = file_get_contents($data["url"], false, $context);
 	}
 }
