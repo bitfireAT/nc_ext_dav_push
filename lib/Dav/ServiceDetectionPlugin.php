@@ -27,12 +27,13 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\Dav;
 
+use OCA\DavPush\Transport\TransportManager;
+
 use OCP\IUser;
 use OCP\IUserSession;
 
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCA\DAV\Connector\Sabre\Node;
-use OCA\DavPush\Transport\TransportManager;
+use OCA\DAV\CalDAV\Calendar;
 
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
@@ -61,9 +62,9 @@ class ServiceDetectionPlugin extends ServerPlugin {
 			return;
 		}
 
-		//if (!($node instanceof Node)) {
-		//	return;
-		//}
+		if (!($node instanceof Calendar)) {
+			return;
+		}
 
 		$propFind->handle(
 			self::PROPERTY_PUSH_TRANSPORTS,
@@ -101,7 +102,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 
 			//	return "test-return-push";
 			//},
-			"test-return-push-topic"
+			$node->getName()
 		);
 	}
 }
