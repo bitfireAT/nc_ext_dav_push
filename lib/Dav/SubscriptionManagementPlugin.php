@@ -107,7 +107,10 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 					$subscriptionParameterIncluded = True;
 					
 					if(sizeof($parameter["value"]) == 1) {
-						$subscriptionType = preg_replace('/^\{DAV:Push\}/', '', $parameter["value"][0]["name"]);
+						$subscriptionType = $parameter["value"][0]["name"];
+						$subscriptionType = preg_replace('/^\{DAV:Push\}/', '', $subscriptionType);
+						$subscriptionType = preg_replace('/-subscription$/', '', $subscriptionType);
+
 						$subscriptionOptions = $parameter["value"][0]["value"];
 					} else {
 						$errors[] = "only one subscription allowed";
