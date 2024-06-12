@@ -32,4 +32,21 @@ class SubscriptionMapper extends QBMapper {
 		
 		return $this->findEntity($qb);
 	}
+
+	/**
+	 * @param string $userId
+	 * @param string $collectionName
+	 * @return Subscription[]
+	 */
+	public function findAll(string $userId, string $collectionName): array {
+		/* @var $qb IQueryBuilder */
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from(self::TABLENAME)
+			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)))
+			->andWhere($qb->expr()->eq('collection_name', $qb->createNamedParameter($collectionName)));
+		
+		return $this->findEntities($qb);
+	}
 }
