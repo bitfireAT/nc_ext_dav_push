@@ -29,7 +29,7 @@ namespace OCA\DavPush\Dav;
 
 use OCA\DavPush\Transport\TransportManager;
 use OCA\DavPush\Db\Subscription;
-use OCA\DavPush\Db\SubscriptionMapper;
+use OCA\DavPush\Service\SubscriptionService;
 
 use OCP\IUserSession;
 use OCP\IURLGenerator;
@@ -60,7 +60,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 		private IUserSession $userSession,
 		private TransportManager $transportManager,
 		private IURLGenerator $URLGenerator,
-		private SubscriptionMapper $subscriptionMapper,
+		private SubscriptionService $subscriptionService,
 		private $userId,
 	) {
 	}
@@ -100,7 +100,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 
 			$subscriptionType = "";
 			$subscriptionOptions = [];
-			$subscriptionExpires = False;
+			$subscriptionExpires = 0;
 
 			foreach($parameters as $parameter) {
 				if($parameter["name"] == self::PUSH_SUBSCRIPTION && !$subscriptionParameterIncluded) {
@@ -112,8 +112,8 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 					} else {
 						$errors[] = "only one subscription allowed";
 					}
-				} elseif($parameter["name"] == self::PUSH_EXPIRES && !$subscriptionExpires) {
-					$subscriptionExpires = \DateTime::createFromFormat(self::IMF_FIXDATE_FORMAT, $parameter["value"]);
+				} elseif($parameter["name"] == self::PUSH_EXPIRES && $subscriptionExpires === 0) {
+					$subscriptionExpires = \DateTime::createFromFormat(self::IMF_FIXDATE_FORMAT, $parameter["value"])->getTimestamp();
 				}
 			}
 
@@ -148,18 +148,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 				$response->setStatus($responseStatus);
 				
 				// create subscription entry in db
-				$subscription = new Subscription();
-				$subscription->setUserId($this->userId);
-				$subscription->setCollectionName($node->getName());
-				$subscription->setTransport($subscriptionType);
-				$subscription->setCreationTimestamp(time());
-				if(!$subscriptionExpires) {
-					$subscription->setExpirationTimestamp(0);
-				} else {
-					$subscription->setExpirationTimestamp($subscriptionExpires->getTimestamp());
-				}
-				$subscription->setData(json_encode($data));
-				$subscription = $this->subscriptionMapper->insert($subscription);
+				$subscription = $this->subscriptionService->create($this->userId, $node->getName(), $subscriptionType, $subscriptionExpires, $data);
 				
 				// generate default unsubscribe link, unless transport requested a custom url
 				$unsubscribeLink = $unsubscribeLink ?? $this->URLGenerator->getAbsoluteURL("/apps/dav_push/subscriptions/" . $subscription->getId());

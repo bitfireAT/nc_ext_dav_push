@@ -38,14 +38,14 @@ use OCA\DAV\Events\CardUpdatedEvent;
 
 use Psr\Log\LoggerInterface;
 
-use OCA\DavPush\Db\SubscriptionMapper;
+use OCA\DavPush\Service\SubscriptionService;
 use OCA\DavPush\Transport\TransportManager;
 
 class CalendarListener implements IEventListener {
 
     public function __construct(
 		private LoggerInterface $logger,
-		private SubscriptionMapper $subscriptionMapper,
+		private SubscriptionService $subscriptionService,
 		private TransportManager $transportManager,
 		private $userId,
 	) {}
@@ -57,12 +57,12 @@ class CalendarListener implements IEventListener {
         }
 
 		$collectionName = $event->getCalendarData()['uri'];
-		$subscriptions = $this->subscriptionMapper->findAll($this->userId, $collectionName);
+		$subscriptions = $this->subscriptionService->findAll($collectionName);
 
 		foreach($subscriptions as $subscription) {
 			$transport = $this->transportManager->getTransport($subscription->getTransport());
 			try {
-				$transport->notify($this->userId, $collectionName, json_decode($subscription->getData(), True));
+				$transport->notify($subscription->getUserId(), $collectionName, json_decode($subscription->getData(), True));
 			} catch (Error $e) {
 				$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
 			}
