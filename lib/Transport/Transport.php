@@ -38,4 +38,6 @@ abstract class Transport {
 	}
 
 	abstract public function registerSubscription($options);
+
+	abstract public function notify(string $userId, string $collectionName, $data);
 }
