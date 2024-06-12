@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\Entity;
 class Subscription extends Entity implements JsonSerializable {
 	protected $userId;
 	protected $collectionName;
+	protected $transport;
 	protected $data;
 	protected $creationTimestamp;
 	protected $expirationTimestamp;
@@ -23,9 +24,10 @@ class Subscription extends Entity implements JsonSerializable {
 			'id' => $this->id,
 			'userId' => $this->userId,
 			'collectionName' => $this->collectionName,
+			'transport' => $this->transport,
 			'data' => $this->data,
 			'creationTimestamp' => $this->creationTimestamp,
-			'expirationTimestamp' => $this->expirationTimestampv
+			'expirationTimestamp' => $this->expirationTimestamp
 		];
 	}
 }

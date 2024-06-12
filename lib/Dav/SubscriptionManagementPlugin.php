@@ -107,7 +107,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 					$subscriptionParameterIncluded = True;
 					
 					if(sizeof($parameter["value"]) == 1) {
-						$subscriptionType = $parameter["value"][0]["name"];
+						$subscriptionType = preg_replace('/^\{DAV:Push\}/', '', $parameter["value"][0]["name"]);
 						$subscriptionOptions = $parameter["value"][0]["value"];
 					} else {
 						$errors[] = "only one subscription allowed";
@@ -121,7 +121,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 				$errors[] = "no subscription included";
 			}
 
-			$transport = $this->transportManager->getTransport(preg_replace('/^\{DAV:Push\}/', '', $subscriptionType));
+			$transport = $this->transportManager->getTransport($subscriptionType);
 
 			if($transport === null) {
 				$errors[] = $subscriptionType . " transport does not exist";
@@ -151,6 +151,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 				$subscription = new Subscription();
 				$subscription->setUserId($this->userId);
 				$subscription->setCollectionName($node->getName());
+				$subscription->setTransport($subscriptionType);
 				$subscription->setCreationTimestamp(time());
 				if(!$subscriptionExpires) {
 					$subscription->setExpirationTimestamp(0);
