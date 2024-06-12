@@ -123,25 +123,24 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 
 			$transport = $this->transportManager->getTransport($subscriptionType);
 
-			if($transport === null) {
+			if(!is_null($transport)) {
+				[
+					'success' => $registerSuccess,
+					'error' => $registerError,
+					'responseStatus' => $responseStatus,
+					'response' => $responseContent,
+					'unsubscribeLink' => $unsubscribeLink,
+					'data' => $data
+				] = $transport->registerSubscription($subscriptionOptions);
+
+				$responseStatus = $responseStatus ?? Http::STATUS_CREATED;
+				$data = $data ?? False;
+
+				if(!$registerSuccess) {
+					$errors[] = $registerError;
+				}
+			} else {
 				$errors[] = $subscriptionType . " transport does not exist";
-			}
-
-			[
-				'success' => $registerSuccess,
-				'error' => $registerError,
-				'responseStatus' => $responseStatus,
-				'response' => $responseContent,
-				'unsubscribeLink' => $unsubscribeLink,
-				'data' => $data
-			] = $transport->registerSubscription($subscriptionOptions);
-
-			$responseStatus = $responseStatus ?? Http::STATUS_CREATED;
-			$data = $data ?? False;
-
-
-			if(!$registerSuccess) {
-				$errors[] = $registerError;
 			}
 
 			if(sizeof($errors) == 0) {
