@@ -7,5 +7,6 @@ return [
         'resources' => [
         ],
         'routes' => [
+			['name' => 'subscription#destroy', 'url' => '/subscriptions/{id}', 'verb' => 'DELETE']
         ]
 ];
