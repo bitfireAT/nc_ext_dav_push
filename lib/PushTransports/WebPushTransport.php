@@ -27,18 +27,49 @@ declare(strict_types=1);
 namespace OCA\DavPush\PushTransports;
 
 use OCA\DavPush\Transport\Transport;
+use Sabre\Xml\Service;
 
 class WebPushTransport extends Transport {
 	protected $id = "web-push";
 
 	public function registerSubscription($options) {
-		return [
-			'success' => True,
-			'response' => "web push test",
-		];
+		$pushResource = False;
+
+		foreach($options as $option) {
+			if ($option["name"] == "{DAV:Push}push-resource") {
+				$pushResource = $option["value"];
+			}
+		}
+
+		if($pushResource) {
+			return [
+				'success' => True,
+				'response' => "",
+				'data' => [ "pushResource" => $pushResource ],
+			];
+		} else {
+			return [
+				'success' => False,
+				'error' => "push resource not provided",
+			];
+		}
 	}
 
 	public function notify(string $userId, string $collectionName, $data) {
+		$xmlService = new Service();
 
+		$content = $xmlService->write('{DAV:Push}push-message', [
+			'topic' => $collectionName,
+		]);
+
+		$options = [
+			'http' => [
+				'method' => 'POST',
+				'content' => $content,
+			],
+		];
+
+		$context = stream_context_create($options);
+		$result = file_get_contents($data["pushResource"], false, $context);
 	}
 }
