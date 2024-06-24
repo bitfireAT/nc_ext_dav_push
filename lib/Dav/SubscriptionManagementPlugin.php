@@ -60,8 +60,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 		private IUserSession $userSession,
 		private TransportManager $transportManager,
 		private IURLGenerator $URLGenerator,
-		private SubscriptionService $subscriptionService,
-		private $userId,
+		private SubscriptionService $subscriptionService
 	) {
 	}
 
@@ -150,7 +149,8 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 				$response->setStatus($responseStatus);
 				
 				// create subscription entry in db
-				$subscription = $this->subscriptionService->create($this->userId, $node->getName(), $subscriptionType, $subscriptionExpires, $data);
+				$user = $this->userSession->getUser();
+				$subscription = $this->subscriptionService->create($user->getUID(), $node->getName(), $subscriptionType, $subscriptionExpires, $data);
 				
 				// generate default unsubscribe link, unless transport requested a custom url
 				$unsubscribeLink = $unsubscribeLink ?? $this->URLGenerator->getAbsoluteURL("/apps/dav_push/subscriptions/" . $subscription->getId());
