@@ -59,7 +59,7 @@ class WebPushTransport extends Transport {
 		$xmlService = new Service();
 
 		$content = $xmlService->write('{DAV:Push}push-message', [
-			'topic' => $collectionName,
+			'{DAV:Push}topic' => $collectionName,
 		]);
 
 		$options = [
