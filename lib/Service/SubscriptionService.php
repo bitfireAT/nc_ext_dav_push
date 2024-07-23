@@ -43,14 +43,13 @@ class SubscriptionService {
 		}
 	}
 
-	public function create(string $userId, string $collectionName, string $transport, int $expirationTimestamp, $data, ?int $creationTimestamp = null) {
+	public function create(string $userId, string $collectionName, string $transport, int $expirationTimestamp, ?int $creationTimestamp = null) {
 		$subscription = new Subscription();
 		$subscription->setUserId($userId);
 		$subscription->setCollectionName($collectionName);
 		$subscription->setTransport($transport);
 		$subscription->setCreationTimestamp($creationTimestamp ?? time());
 		$subscription->setExpirationTimestamp($expirationTimestamp);
-		$subscription->setData(json_encode($data));
 		$subscription = $this->mapper->insert($subscription);
 
 		return $subscription;

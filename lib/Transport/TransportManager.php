@@ -27,18 +27,21 @@ declare(strict_types=1);
 namespace OCA\DavPush\Transport;
 
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Server;
 
 use OCA\DavPush\Events\RegisterTransportsEvent;
 use OCA\DavPush\PushTransports\WebPushTransport;
-use OCA\DavPush\PushTransports\WebhookTransport;
+//use OCA\DavPush\PushTransports\WebhookTransport;
 
 class TransportManager {
 	private array $transports = [];
 
-	public function __construct(IEventDispatcher $dispatcher) {
+	public function __construct(
+		IEventDispatcher $dispatcher,
+	) {
 		// register integrated transports
-		$this->registerTransport(new WebPushTransport());
-		$this->registerTransport(new WebhookTransport());
+		$this->registerTransport(Server::get(WebPushTransport::class));
+		//$this->registerTransport(ContainerInterface::get(WebhookTransport::class));
 
 		// register transports provided by other apps
 		$event = new RegisterTransportsEvent($this);
