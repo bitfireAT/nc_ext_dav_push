@@ -37,7 +37,35 @@ abstract class Transport {
 		return [];
 	}
 
-	abstract public function registerSubscription($options);
+	// Transport must return whether the provided options are valid.
+	// This is called before registering a subscription and decides wether to proceed.
+	/* Must return an array of the shape:
+		[
+			valid: bool,
+			errors: ?array[string], // should be human readable
+		]
+	*/
+	abstract public function validateOptions($options): array;
+
+	// Transport must save any options (with association to subsciptionId) it needs later and do any init logic neccessary.
+	/* Must return an array of the shape:
+		[
+			success: bool,
+			errors: ?array[string], // should be human readable
+			responseStatus: ?int, // http response code to the registration
+			response: array, // will be converted to xml and used as the response to the registration
+			unsubscribeLink: ?string, // overwrites unsubscribe link, transport needs to handle cleanup of entry in db itself
+		]
+	*/
+	abstract public function registerSubscription($subsciptionId, $options);
+
+	// Transport needs to be able to map subscription options back to a subscription id.
+	// API Requests to create and update a subscription are the same, therefore if a subscription id is associated with the given options the subscription is updated, otherwise a new subscription is added.
+	// Which option(s) uniquely identify a subscription is implementation specific.
+	abstract public function getSubscriptionIdFromOptions($options): int;
+
+	// Change mutable options of the subscription (if any exist)
+	abstract public function updateSubscription($subsciptionId, $options);
 
 	abstract public function notify(string $userId, string $collectionName, $data);
 }
