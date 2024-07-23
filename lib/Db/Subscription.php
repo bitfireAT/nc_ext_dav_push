@@ -10,7 +10,6 @@ class Subscription extends Entity implements JsonSerializable {
 	protected $userId;
 	protected $collectionName;
 	protected $transport;
-	protected $data;
 	protected $creationTimestamp;
 	protected $expirationTimestamp;
 
@@ -25,7 +24,6 @@ class Subscription extends Entity implements JsonSerializable {
 			'userId' => $this->userId,
 			'collectionName' => $this->collectionName,
 			'transport' => $this->transport,
-			'data' => $this->data,
 			'creationTimestamp' => $this->creationTimestamp,
 			'expirationTimestamp' => $this->expirationTimestamp
 		];
