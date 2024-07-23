@@ -27,32 +27,55 @@ declare(strict_types=1);
 namespace OCA\DavPush\PushTransports;
 
 use OCA\DavPush\Transport\Transport;
+use OCA\DavPush\Service\WebPushSubscriptionService;
+
 use Sabre\Xml\Service;
 
 class WebPushTransport extends Transport {
 	protected $id = "web-push";
 
-	public function registerSubscription($options) {
-		$pushResource = False;
+	public function __construct(
+		private WebPushSubscriptionService $webPushSubscriptionService,
+	) {}
+
+	private function parseOptions(array $options): array {
+		$result = [];
 
 		foreach($options as $option) {
 			if ($option["name"] == "{DAV:Push}push-resource") {
-				$pushResource = $option["value"];
+				$result["pushResource"] = $option["value"];
 			}
 		}
 
-		if($pushResource) {
+		return $result;
+	}
+
+	public function validateOptions($options): array {
+		['pushResource' => $pushResource] = $this->parseOptions($options);
+
+		// TODO: check if string is valid URL
+
+		if(isset($pushResource) && $pushResource !== '') {
 			return [
-				'success' => True,
-				'response' => "",
-				'data' => [ "pushResource" => $pushResource ],
+				'valid' => True,
 			];
 		} else {
 			return [
-				'success' => False,
-				'error' => "push resource not provided",
+				'valid' => False,
+				'errors' => ["push resource not provided"]
 			];
 		}
+	}
+
+	public function registerSubscription($subsciptionId, $options) {
+		['pushResource' => $pushResource] = $this->parseOptions($options);
+
+		$this->webPushSubscriptionService->create($subsciptionId, $pushResource);
+
+		return [
+			'success' => True,
+			'response' => "",
+		];
 	}
 
 	public function notify(string $userId, string $collectionName, $data) {
@@ -71,5 +94,15 @@ class WebPushTransport extends Transport {
 
 		$context = stream_context_create($options);
 		$result = file_get_contents($data["pushResource"], false, $context);
+	}
+
+	public function getSubscriptionIdFromOptions($options): int {
+		['pushResource' => $pushResource] = $this->parseOptions($options);
+
+		return $this->webPushSubscriptionService->findByPushResource($pushResource)->getSubscriptionId();
+	}
+
+	public function updateSubscription($subsciptionId, $options) {
+		// there are no options which can be edited -> NOOP
 	}
 }
