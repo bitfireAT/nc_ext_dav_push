@@ -32,8 +32,8 @@ use OCP\DB\ISchemaWrapper;
 use OCP\Migration\SimpleMigrationStep;
 use OCP\Migration\IOutput;
 
-class Version001Date20240515221000 extends SimpleMigrationStep {
-	public const SUBSCRIPTIONS_TABLE = "dav_push_subscriptions";
+class Version001Date20240710115500 extends SimpleMigrationStep {
+	public const WEBPUSH_SUBSCRIPTIONS_TABLE = "dav_push_subscriptions_webpush";
 
 	/**
 	 * @param IOutput $output
@@ -45,33 +45,18 @@ class Version001Date20240515221000 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		if (!$schema->hasTable(self::SUBSCRIPTIONS_TABLE)) {
-			$table = $schema->createTable(self::SUBSCRIPTIONS_TABLE);
+		if (!$schema->hasTable(self::WEBPUSH_SUBSCRIPTIONS_TABLE)) {
+			$table = $schema->createTable(self::WEBPUSH_SUBSCRIPTIONS_TABLE);
 
-			$table->addColumn('id', Types::INTEGER, [
-				'autoincrement' => true,
+			$table->addColumn('subscription_id', Types::INTEGER, [
 				'notnull' => true,
 			]);
-			$table->addColumn('user_id', Types::STRING, [
+			$table->addColumn('push_resource', Types::STRING, [
 				'notnull' => true,
-				'length' => 200,
-			]);
-			$table->addColumn('collection_name', Types::STRING, [
-				'notnull' => true,
-				'length' => 100,
-			]);
-			$table->addColumn('transport', Types::STRING, [
-				'notnull' => true,
-				'length' => 100,
-			]);
-			$table->addColumn('creation_timestamp', Types::BIGINT, [
-				'notnull' => true,
-			]);
-			$table->addColumn('expiration_timestamp', Types::BIGINT, [
-				'notnull' => true,
+				'length' => 300,
 			]);
 
-			$table->setPrimaryKey(['id']);
+			$table->setPrimaryKey(['subscription_id']);
 		}
 
 		return $schema;
