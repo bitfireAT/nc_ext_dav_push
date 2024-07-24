@@ -62,7 +62,7 @@ abstract class Transport {
 	// Transport needs to be able to map subscription options back to a subscription id.
 	// API Requests to create and update a subscription are the same, therefore if a subscription id is associated with the given options the subscription is updated, otherwise a new subscription is added.
 	// Which option(s) uniquely identify a subscription is implementation specific.
-	abstract public function getSubscriptionIdFromOptions($options): int;
+	abstract public function getSubscriptionIdFromOptions($options): ?int;
 
 	// Change mutable options of the subscription (if any exist)
 	abstract public function updateSubscription($subsciptionId, $options);

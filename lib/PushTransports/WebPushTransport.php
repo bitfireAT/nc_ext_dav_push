@@ -28,6 +28,7 @@ namespace OCA\DavPush\PushTransports;
 
 use OCA\DavPush\Transport\Transport;
 use OCA\DavPush\Service\WebPushSubscriptionService;
+use OCA\DavPush\Errors\WebPushSubscriptionNotFound;
 
 use Sabre\Xml\Service;
 
@@ -96,10 +97,14 @@ class WebPushTransport extends Transport {
 		$result = file_get_contents($data["pushResource"], false, $context);
 	}
 
-	public function getSubscriptionIdFromOptions($options): int {
+	public function getSubscriptionIdFromOptions($options): ?int {
 		['pushResource' => $pushResource] = $this->parseOptions($options);
 
-		return $this->webPushSubscriptionService->findByPushResource($pushResource)->getSubscriptionId();
+		try {
+			return $this->webPushSubscriptionService->findByPushResource($pushResource)->getSubscriptionId();
+		} catch (WebPushSubscriptionNotFound $e) {
+			return null;
+		}
 	}
 
 	public function updateSubscription($subsciptionId, $options) {
