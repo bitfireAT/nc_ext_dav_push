@@ -13,6 +13,9 @@
     <category>tools</category>
     <bugs>https://github.com/bitfireAT/nc-ext-caldav-carddav-push/issues</bugs>
     <dependencies>
-        <nextcloud min-version="28" max-version="28"/>
+        <database>pgsql</database>
+        <database>sqlite</database>
+        <database>mysql</database>
+        <nextcloud min-version="28" max-version="29"/>
     </dependencies>
 </info>
