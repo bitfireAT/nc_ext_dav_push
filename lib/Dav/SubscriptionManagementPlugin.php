@@ -169,6 +169,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 						[
 							'success' => $updateSuccess,
 							'errors' => $updateErrors,
+							'response' => $responseContent,
 						] =	$transport->updateSubscription($subscription->getId(), $subscriptionOptions);
 
 						if(!$updateSuccess) {

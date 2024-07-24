@@ -111,6 +111,7 @@ class WebPushTransport extends Transport {
 		// there are no options which can be edited -> NOOP
 		return [
 			'success' => True,
+			'response' => "",
 		];
 	}
 }
