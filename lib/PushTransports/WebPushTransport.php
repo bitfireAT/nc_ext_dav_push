@@ -79,8 +79,10 @@ class WebPushTransport extends Transport {
 		];
 	}
 
-	public function notify(string $userId, string $collectionName, $data) {
+	public function notify(string $userId, string $collectionName, int $subscriptionId) {
 		$xmlService = new Service();
+
+		$pushResource = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId)->getPushResource();
 
 		$content = $xmlService->write('{DAV:Push}push-message', [
 			'{DAV:Push}topic' => $collectionName,
@@ -94,7 +96,7 @@ class WebPushTransport extends Transport {
 		];
 
 		$context = stream_context_create($options);
-		$result = file_get_contents($data["pushResource"], false, $context);
+		$result = file_get_contents($pushResource, false, $context);
 	}
 
 	public function getSubscriptionIdFromOptions($options): ?int {

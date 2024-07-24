@@ -67,5 +67,5 @@ abstract class Transport {
 	// Change mutable options of the subscription (if any exist)
 	abstract public function updateSubscription($subsciptionId, $options);
 
-	abstract public function notify(string $userId, string $collectionName, $data);
+	abstract public function notify(string $userId, string $collectionName, int $subscriptionId);
 }
