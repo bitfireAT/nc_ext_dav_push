@@ -57,11 +57,11 @@ class WebPushTransport extends Transport {
 
 		if(isset($pushResource) && $pushResource !== '') {
 			return [
-				'valid' => True,
+				'success' => True,
 			];
 		} else {
 			return [
-				'valid' => False,
+				'success' => False,
 				'errors' => ["push resource not provided"]
 			];
 		}
@@ -104,5 +104,8 @@ class WebPushTransport extends Transport {
 
 	public function updateSubscription($subsciptionId, $options) {
 		// there are no options which can be edited -> NOOP
+		return [
+			'success' => True,
+		];
 	}
 }

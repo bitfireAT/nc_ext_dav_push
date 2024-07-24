@@ -55,16 +55,12 @@ class SubscriptionService {
 		return $subscription;
 	}
 
-	public function update(string $userId, int $id, ?int $expirationTimestamp, mixed $data) {
+	public function update(string $userId, int $id, ?int $expirationTimestamp) {
 		try {
 			$subscription = $this->mapper->find($userId, $id);
 			
 			if (!is_null($expirationTimestamp)) {
 				$subscription->setExpirationTimestamp($expirationTimestamp);
-			}
-
-			if (!is_null($data)) {
-				$subscription->setData(json_encode($data));
 			}
 
 			return $this->mapper->update($subscription);

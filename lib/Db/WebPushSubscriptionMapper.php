@@ -21,7 +21,7 @@ class WebPushSubscriptionMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function findBySubscriptionId(int $subscriptionId): Subscription {
+	public function findBySubscriptionId(int $subscriptionId): WebPushSubscription {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -37,7 +37,7 @@ class WebPushSubscriptionMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function findByPushResource(string $pushResource): Subscription {
+	public function findByPushResource(string $pushResource): WebPushSubscription {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')

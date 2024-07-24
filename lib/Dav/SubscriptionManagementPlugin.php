@@ -127,19 +127,62 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 
 			if(!is_null($transport)) {
 				[
-					'success' => $registerSuccess,
-					'error' => $registerError,
-					'responseStatus' => $responseStatus,
-					'response' => $responseContent,
-					'unsubscribeLink' => $unsubscribeLink,
-					'data' => $data
-				] = $transport->registerSubscription($subscriptionOptions);
+					'success' => $validateSuccess,
+					'errors' => $validateErrors,
+				] = $transport->validateOptions($subscriptionOptions);
 
-				$responseStatus = $responseStatus ?? Http::STATUS_CREATED;
-				$data = $data ?? False;
+				if(!$validateSuccess) {
+					if(isset($validateErrors) && !empty($validateErrors)) {
+						$errors = array_merge($errors, $validateErrors);
+					} else {
+						$errors[] = "options validation error";
+					}
+				} else {
+					$existingSubscriptionId = $transport->getSubscriptionIdFromOptions($subscriptionOptions);
 
-				if(!$registerSuccess) {
-					$errors[] = $registerError;
+					$user = $this->userSession->getUser();
+
+					if(!is_int($existingSubscriptionId)) {
+						// create new subscription entry in db
+						$subscription = $this->subscriptionService->create($user->getUID(), $node->getName(), $subscriptionType, $subscriptionExpires);
+
+						[
+							'success' => $registerSuccess,
+							'errors' => $registerErrors,
+							'responseStatus' => $responseStatus,
+							'response' => $responseContent,
+							'unsubscribeLink' => $unsubscribeLink,
+						] = $transport->registerSubscription($subscription->getId(), $subscriptionOptions);
+
+						$responseStatus = $responseStatus ?? Http::STATUS_CREATED;
+
+						if(!$registerSuccess) {
+							if(isset($registerErrors) && !empty($registerErrors)) {
+								$errors = array_merge($errors, $registerErrors);
+							} else {
+								$errors[] = "registration error";
+							}
+						}
+					} else {
+						$subscription = $this->subscriptionService->find($user->getUID(), $existingSubscriptionId);
+
+						[
+							'success' => $updateSuccess,
+							'errors' => $updateErrors,
+						] =	$transport->updateSubscription($subscription->getId(), $subscriptionOptions);
+
+						if(!$updateSuccess) {
+							if(isset($updateErrors) && !empty($updateErrors)) {
+								$errors = array_merge($errors, $updateErrors);
+							} else {
+								$errors[] = "subscription update error";
+							}
+						} else {
+							$subscription = $this->subscriptionService->update($user->getUID(), $subscription->getId(), $subscriptionExpires);
+
+							$responseStatus = Http::STATUS_CREATED;
+						}
+					}
 				}
 			} else {
 				$errors[] = $subscriptionType . " transport does not exist";
@@ -147,10 +190,6 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 
 			if(sizeof($errors) == 0) {
 				$response->setStatus($responseStatus);
-				
-				// create subscription entry in db
-				$user = $this->userSession->getUser();
-				$subscription = $this->subscriptionService->create($user->getUID(), $node->getName(), $subscriptionType, $subscriptionExpires, $data);
 				
 				// generate default unsubscribe link, unless transport requested a custom url
 				$unsubscribeLink = $unsubscribeLink ?? $this->URLGenerator->getAbsoluteURL("/apps/dav_push/subscriptions/" . $subscription->getId());
