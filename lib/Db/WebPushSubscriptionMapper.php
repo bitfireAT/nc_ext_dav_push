@@ -10,6 +10,7 @@ use OCP\IDBConnection;
 
 class WebPushSubscriptionMapper extends QBMapper {	
 	public const TABLENAME = 'dav_push_subscriptions_webpush';
+	public const SUBSCRIPTIONS_TABLENAME = "dav_push_subscriptions";
 
 	public function __construct(IDBConnection $db) {
 		parent::__construct($db, self::TABLENAME, WebPushSubscription::class);
@@ -37,12 +38,17 @@ class WebPushSubscriptionMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function findByPushResource(string $pushResource): WebPushSubscription {
+	public function findByPushResource(string $userId, string $collectionName, string $pushResource): WebPushSubscription {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
-		$qb->select('*')
-			->from(self::TABLENAME)
-			->where($qb->expr()->eq('push_resource', $qb->createNamedParameter($pushResource)));
+		$qb->select('webpush.*')
+			->from(self::TABLENAME, 'webpush');
+
+		$qb->innerJoin('webpush', self::SUBSCRIPTIONS_TABLENAME, 'subscription', $qb->expr()->eq('webpush.subscription_id', 'subscription.id'));
+
+		$qb->where($qb->expr()->eq('webpush.push_resource', $qb->createNamedParameter($pushResource)))
+			->andWhere($qb->expr()->eq('subscription.user_id', $qb->createNamedParameter($userId)))
+			->andWhere($qb->expr()->eq('subscription.collection_name', $qb->createNamedParameter($collectionName)));
 		
 		return $this->findEntity($qb);
 	}

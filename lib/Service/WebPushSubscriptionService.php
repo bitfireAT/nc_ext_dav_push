@@ -35,9 +35,9 @@ class WebPushSubscriptionService {
 		}
     }
 
-    public function findByPushResource(string $pushResource): ?WebPushSubscription {
+    public function findByPushResource(string $userId, string $collectionName, string $pushResource): ?WebPushSubscription {
         try {
-			return $this->mapper->findByPushResource($pushResource);
+			return $this->mapper->findByPushResource($userId, $collectionName, $pushResource);
 		} catch (Exception $e) {
 			$this->handleException($e);
 		}

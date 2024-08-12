@@ -99,11 +99,11 @@ class WebPushTransport extends Transport {
 		$result = file_get_contents($pushResource, false, $context);
 	}
 
-	public function getSubscriptionIdFromOptions($options): ?int {
+	public function getSubscriptionIdFromOptions(string $userId, string $collectionName, $options): ?int {
 		['pushResource' => $pushResource] = $this->parseOptions($options);
 
 		try {
-			return $this->webPushSubscriptionService->findByPushResource($pushResource)->getSubscriptionId();
+			return $this->webPushSubscriptionService->findByPushResource($userId, $collectionName, $pushResource)->getSubscriptionId();
 		} catch (WebPushSubscriptionNotFound $e) {
 			return null;
 		}

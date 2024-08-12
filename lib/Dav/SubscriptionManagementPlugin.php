@@ -138,9 +138,9 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 						$errors[] = "options validation error";
 					}
 				} else {
-					$existingSubscriptionId = $transport->getSubscriptionIdFromOptions($subscriptionOptions);
-
 					$user = $this->userSession->getUser();
+
+					$existingSubscriptionId = $transport->getSubscriptionIdFromOptions($user->getUID(), $node->getName(), $subscriptionOptions);
 
 					if(!is_int($existingSubscriptionId)) {
 						// create new subscription entry in db
@@ -164,24 +164,30 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 							}
 						}
 					} else {
+						// implicitly checks if subscription found by transport is really owned by correct user
 						$subscription = $this->subscriptionService->find($user->getUID(), $existingSubscriptionId);
-
-						[
-							'success' => $updateSuccess,
-							'errors' => $updateErrors,
-							'response' => $responseContent,
-						] =	$transport->updateSubscription($subscription->getId(), $subscriptionOptions);
-
-						if(!$updateSuccess) {
-							if(isset($updateErrors) && !empty($updateErrors)) {
-								$errors = array_merge($errors, $updateErrors);
-							} else {
-								$errors[] = "subscription update error";
-							}
+						
+						// check if subscription found by transport is really for correct collection
+						if($subscription->getCollectionName() !== $node->getName()) {
+							$errors[] = "subscription update error";
 						} else {
-							$subscription = $this->subscriptionService->update($user->getUID(), $subscription->getId(), $subscriptionExpires);
+							[
+								'success' => $updateSuccess,
+								'errors' => $updateErrors,
+								'response' => $responseContent,
+							] =	$transport->updateSubscription($subscription->getId(), $subscriptionOptions);
 
-							$responseStatus = Http::STATUS_CREATED;
+							if(!$updateSuccess) {
+								if(isset($updateErrors) && !empty($updateErrors)) {
+									$errors = array_merge($errors, $updateErrors);
+								} else {
+									$errors[] = "subscription update error";
+								}
+							} else {
+								$subscription = $this->subscriptionService->update($user->getUID(), $subscription->getId(), $subscriptionExpires);
+	
+								$responseStatus = Http::STATUS_CREATED;
+							}
 						}
 					}
 				}
