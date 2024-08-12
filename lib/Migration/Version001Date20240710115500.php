@@ -53,7 +53,7 @@ class Version001Date20240710115500 extends SimpleMigrationStep {
 			]);
 			$table->addColumn('push_resource', Types::STRING, [
 				'notnull' => true,
-				'length' => 300,
+				'length' => 3000,
 			]);
 
 			$table->setPrimaryKey(['subscription_id']);
