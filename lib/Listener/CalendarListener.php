@@ -63,7 +63,7 @@ class CalendarListener implements IEventListener {
 			$transport = $this->transportManager->getTransport($subscription->getTransport());
 			try {
 				$transport->notify($subscription->getUserId(), $collectionName, $subscription->getId());
-			} catch (Error $e) {
+			} catch (\Exception $e) {
 				$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
 			}
 		}
