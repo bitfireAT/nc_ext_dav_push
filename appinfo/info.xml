@@ -3,8 +3,23 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>dav_push</id>
     <name>DAV Push</name>
-    <summary>Implements the DAV Push specification</summary>
-    <description><![CDATA[This app allows you to send push notifications from your Nextcloud server to different clients, including mobile devices, desktop computers, and web browsers.]]></description>
+    <summary>Dav Push is an extension to demonstrate WebDAV-Push support on calendars/address books.</summary>
+    <description><![CDATA[
+**This extension is in a very early stage of development. It is for demonstration and testing purposes only. Don't use it on production systems!**
+
+In proprietary environments, changes in events and contacts are nowadays usually pushed to other clients so that they can update their views almost in real-time.
+
+WebDAV however (and in this context, especially CalDAV and CardDAV) doesn't currently support push notifications of clients when a collection has changed. So clients have to periodically ask the server for changes. This causes unnecessary delays and battery usage.
+
+The WebDAV-Push standard, which is currently in development, wants to solve this problem with an open protocol, too.
+
+This is the server part of these efforts to draft a standard and provide a working implementation (server + client) in order to demonstrate it.
+
+
+The current WebDAV-Push draft is provided by [@bitfireAT](https://github.com/bitfireAT).
+          
+This Nextcloud extension has been developed by [@verdigado](https://github.com/verdigado).
+    ]]></description>
     <version>0.0.1</version>
     <licence>agpl</licence>
     <author mail="info@bitfire.at" homepage="https://github.com/bitfireAT/webdav-push">bitfire web engineering</author>
