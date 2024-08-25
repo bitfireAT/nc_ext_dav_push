@@ -1,7 +1,8 @@
 ![Development stage: alpha](https://img.shields.io/badge/development%20stage-preview-blue)
+[![Software License](https://img.shields.io/badge/license-AGPL-brightgreen.svg)](LICENSE)
 
-_Note:_ If you're coming from the Nextcloud Conf 2024 lightning talk, you can find the [slides here](https://cloud.bitfire.at/s/WoPZaEnC9tmNxa6).
-
+> [!NOTE]  
+> If you're coming from the Nextcloud Conf 2024 lightning talk, you can find the [slides here](https://cloud.bitfire.at/s/WoPZaEnC9tmNxa6).
 
 # Nextcloud extension for WebDAV-Push
 
@@ -43,8 +44,7 @@ If you have questions/suggestions or just want to show your interest about
 # Installation instructions
 
 ## App Store
-
-...
+- Search 
 
 
 ## Latest development version
