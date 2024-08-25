@@ -51,9 +51,10 @@ If you have questions/suggestions or just want to show your interest about
 For more details see the [apps management section of the nextcloud docs](https://docs.nextcloud.com/server/stable/admin_manual/apps_management.html)
 
 ## Latest development version
-
-From git ...
-
+- Clone this repository into your apps directory (currently no build step is required, this may change in the future)
+- Open App Store of your Nextcloud instance
+- Search for "DAV Push"
+- Click enable button
 
 ## Usage with DAVx⁵
 
