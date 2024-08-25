@@ -26,7 +26,7 @@ This Nextcloud extension has been developed by [@verdigado](https://github.com/v
     <author mail="mail@jonathan-treffler.de">Jonathan Treffler</author>
     <namespace>DavPush</namespace>
     <category>tools</category>
-    <bugs>https://github.com/bitfireAT/nc-ext-caldav-carddav-push/issues</bugs>
+    <bugs>https://github.com/bitfireAT/nc_ext_dav_push/issues</bugs>
     <dependencies>
         <database>pgsql</database>
         <database>sqlite</database>
