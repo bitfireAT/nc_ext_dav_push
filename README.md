@@ -44,8 +44,11 @@ If you have questions/suggestions or just want to show your interest about
 # Installation instructions
 
 ## App Store
-- Search 
+- Open App Store of your Nextcloud instance
+- Search for "DAV Push"
+- Click install button
 
+For more details see the [apps management section of the nextcloud docs](https://docs.nextcloud.com/server/stable/admin_manual/apps_management.html)
 
 ## Latest development version
 
