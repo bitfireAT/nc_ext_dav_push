@@ -4,6 +4,10 @@
 > [!NOTE]  
 > If you're coming from the Nextcloud Conf 2024 lightning talk, you can find the [slides here](https://cloud.bitfire.at/s/WoPZaEnC9tmNxa6).
 
+Watch the video (YouTube):  
+[![Watch the video](https://img.youtube.com/vi/XQ2jhqbDL6M/hqdefault.jpg)](https://youtu.be/XQ2jhqbDL6M)
+
+
 # Nextcloud extension for WebDAV-Push
 
 `nc_ext_dav_push` is a [Nextcloud](https://github.com/nextcloud/server) extension to demonstrate [WebDAV-Push](https://github.com/bitfireAT/webdav-push/) support on calendars/address books.
