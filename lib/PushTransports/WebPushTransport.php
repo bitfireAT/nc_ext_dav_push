@@ -30,6 +30,9 @@ use OCA\DavPush\Transport\Transport;
 use OCA\DavPush\Service\WebPushSubscriptionService;
 use OCA\DavPush\Errors\WebPushSubscriptionNotFound;
 
+use OCP\Http\Client\IClientService;
+use OCP\Http\Client\IPromise;
+
 use Sabre\Xml\Service;
 
 class WebPushTransport extends Transport {
@@ -37,6 +40,7 @@ class WebPushTransport extends Transport {
 
 	public function __construct(
 		private WebPushSubscriptionService $webPushSubscriptionService,
+		private IClientService $httpClientService
 	) {}
 
 	private function parseOptions(array $options): array {
@@ -79,7 +83,7 @@ class WebPushTransport extends Transport {
 		];
 	}
 
-	public function notify(string $userId, string $collectionName, int $subscriptionId) {
+	public function notify(string $userId, string $collectionName, int $subscriptionId): IPromise {
 		$xmlService = new Service();
 
 		$pushResource = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId)->getPushResource();
@@ -88,15 +92,15 @@ class WebPushTransport extends Transport {
 			'{DAV:Push}topic' => $collectionName,
 		]);
 
-		$options = [
-			'http' => [
-				'method' => 'POST',
-				'content' => $content,
-			],
-		];
+		$httpClient = $this->httpClientService->newClient();
 
-		$context = stream_context_create($options);
-		$result = file_get_contents($pushResource, false, $context);
+		return $httpClient->postAsync($pushResource, [
+			"body" => $content,
+			"timeout" => 10,
+			"headers" => [
+				"Content-Type" => "application/xml",
+			],
+		]);
 	}
 
 	public function getSubscriptionIdFromOptions(string $userId, string $collectionName, $options): ?int {

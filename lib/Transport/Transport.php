@@ -26,6 +26,8 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\Transport;
 
+use OCP\Http\Client\IPromise;
+
 abstract class Transport {
 	protected $id;
 
@@ -69,5 +71,5 @@ abstract class Transport {
 	// Change mutable options of the subscription (if any exist)
 	abstract public function updateSubscription($subsciptionId, $options);
 
-	abstract public function notify(string $userId, string $collectionName, int $subscriptionId);
+	abstract public function notify(string $userId, string $collectionName, int $subscriptionId): IPromise;
 }

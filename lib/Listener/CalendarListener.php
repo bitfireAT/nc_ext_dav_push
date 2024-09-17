@@ -37,6 +37,7 @@ use OCA\DAV\Events\CardDeletedEvent;
 use OCA\DAV\Events\CardUpdatedEvent;
 
 use Psr\Log\LoggerInterface;
+use GuzzleHttp\Promise;
 
 use OCA\DavPush\Service\SubscriptionService;
 use OCA\DavPush\Transport\TransportManager;
@@ -59,13 +60,16 @@ class CalendarListener implements IEventListener {
 		$collectionName = $event->getCalendarData()['uri'];
 		$subscriptions = $this->subscriptionService->findAll($collectionName);
 
-		foreach($subscriptions as $subscription) {
-			$transport = $this->transportManager->getTransport($subscription->getTransport());
-			try {
-				$transport->notify($subscription->getUserId(), $collectionName, $subscription->getId());
-			} catch (\Exception $e) {
-				$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
+		$notificationPromises = (function () use ($collectionName, $subscriptions): \Generator {
+			foreach($subscriptions as $subscription) {
+				$transport = $this->transportManager->getTransport($subscription->getTransport());
+				yield $transport->notify($subscription->getUserId(), $collectionName, $subscription->getId());
 			}
-		}
+		})();
+
+		$responses = Promise\Utils::settle($notificationPromises)->wait();
+
+		// TODO: iterate over responses and log errors
+		// $this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
     }
 }
