@@ -60,7 +60,7 @@ class CalendarListener implements IEventListener {
 		$collectionName = $event->getCalendarData()['uri'];
 		$subscriptions = $this->subscriptionService->findAll($collectionName);
 
-		$notificationPromises = (function () use ($collectionName, $subscriptions): Generator {
+		$notificationPromises = (function () use ($collectionName, $subscriptions): \Generator {
 			foreach($subscriptions as $subscription) {
 				$transport = $this->transportManager->getTransport($subscription->getTransport());
 				yield $transport->notify($subscription->getUserId(), $collectionName, $subscription->getId());
