@@ -60,16 +60,26 @@ class CalendarListener implements IEventListener {
 		$collectionName = $event->getCalendarData()['uri'];
 		$subscriptions = $this->subscriptionService->findAll($collectionName);
 
-		$notificationPromises = (function () use ($collectionName, $subscriptions): \Generator {
+		$logger = $this->logger;
+
+		$notificationPromises = (function () use ($collectionName, $subscriptions, $logger): \Generator {
 			foreach($subscriptions as $subscription) {
 				$transport = $this->transportManager->getTransport($subscription->getTransport());
-				yield $transport->notify($subscription->getUserId(), $collectionName, $subscription->getId());
+
+				yield $transport->notify($subscription->getUserId(), $collectionName, $subscription->getId())
+					->then(function($result) use ($subscription, $logger) {
+						$logger->debug("transport " . $subscription->getTransport() . " successfully delivered notification for subscription " . $subscription->getId());
+					}, function ($reason) use ($subscription, $logger) {
+						$logger->error("transport " . $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId() . " with error message: " . $reason);
+						return true;
+					});
 			}
 		})();
 
-		$responses = Promise\Utils::settle($notificationPromises)->wait();
-
-		// TODO: iterate over responses and log errors
-		// $this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
+		try {
+			$responses = Promise\Utils::settle($notificationPromises)->wait(false);
+		} catch (\Exception $e) {
+			$logger->error("HOW DID WE GET HERE; THIS IS NOT HOW THIS IS SUPPOSED TO WORK " . $e->getMessage());
+		}
     }
 }

@@ -67,6 +67,9 @@ class Version001Date20240515221000 extends SimpleMigrationStep {
 			$table->addColumn('creation_timestamp', Types::BIGINT, [
 				'notnull' => true,
 			]);
+			$table->addColumn('last_update_timestamp', Types::BIGINT, [
+				'notnull' => true,
+			]);
 			$table->addColumn('expiration_timestamp', Types::BIGINT, [
 				'notnull' => true,
 			]);
