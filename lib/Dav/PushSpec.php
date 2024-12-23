@@ -29,8 +29,7 @@ class PushSpec {
 	public const PUSH_MESSAGE = self::PUSH_PREFIX . 'push-message';
 
 	public const PROPERTY_PUSH_RESOURCE = self::PUSH_PREFIX . 'push-resource';
-	public const PROPERTY_PUSH_TOPIC = self::PUSH_PREFIX . 'topic';
-	public const PROPERTY_PUSH_TRANSPORT = self::PUSH_PREFIX . 'push-transport';
-	public const PROPERTY_PUSH_TRANSPORTS = self::PUSH_PREFIX . 'push-transports';
+	public const PROPERTY_TOPIC = self::PUSH_PREFIX . 'topic';
+	public const PROPERTY_TRANSPORTS = self::PUSH_PREFIX . 'transports';
 
 }

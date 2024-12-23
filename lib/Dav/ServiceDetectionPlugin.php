@@ -54,7 +54,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 	}
 
 	public function propFind(PropFind $propFind, INode $node) {
-		if (count(array_intersect([PushSpec::PROPERTY_PUSH_TRANSPORTS, PushSpec::PROPERTY_PUSH_TOPIC], $propFind->getRequestedProperties())) == 0) {
+		if (count(array_intersect([PushSpec::PROPERTY_TRANSPORTS, PushSpec::PROPERTY_TOPIC], $propFind->getRequestedProperties())) == 0) {
 			return;
 		}
 
@@ -63,7 +63,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 		}
 
 		$propFind->handle(
-			PushSpec::PROPERTY_PUSH_TRANSPORTS,
+			PushSpec::PROPERTY_TRANSPORTS,
 			function () use ($node) {
 				//$user = $this->userSession->getUser();
 				//if (!($user instanceof IUser)) {
@@ -76,9 +76,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 				
 				foreach($transports as $transport) {
 					$result[] = [
-						(PushSpec::PROPERTY_PUSH_TRANSPORT) => [
-							(PushSpec::PUSH_PREFIX . $transport->getId()) => $transport->getAdditionalInformation(),
-						]
+						(PushSpec::PUSH_PREFIX . $transport->getId()) => $transport->getAdditionalInformation(),
 					];
 				}
 
@@ -89,7 +87,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 		);
 
 		$propFind->handle(
-			PushSpec::PROPERTY_PUSH_TOPIC,
+			PushSpec::PROPERTY_TOPIC,
 			//function () use ($node) {
 				//$user = $this->userSession->getUser();
 				//if (!($user instanceof IUser)) {
