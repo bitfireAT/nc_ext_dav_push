@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\PushTransports;
 
+use OCA\DavPush\Dav\PushSpec;
 use OCA\DavPush\Transport\Transport;
 
 class WebhookTransport extends Transport {
@@ -35,7 +36,7 @@ class WebhookTransport extends Transport {
 		$url = False;
 
 		foreach($options as $option) {
-			if($option["name"] == "{DAV:Push}endpoint") {
+			if($option["name"] == "{".PushSpec::PUSH_PREFIX."}endpoint") {
 				$url = $option["value"];
 			}
 		}
