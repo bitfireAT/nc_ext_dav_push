@@ -87,7 +87,11 @@ class WebPushTransport extends Transport {
 		$pushResource = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId)->getPushResource();
 
 		$content = $xmlService->write(PushSpec::PUSH_MESSAGE, [
-			PushSpec::PROPERTY_TOPIC => $collectionName,
+			'{DAV:}propstat' => [
+				'{DAV:}prop' => [
+					PushSpec::PROPERTY_TOPIC => $collectionName
+				]
+			],
 		]);
 
 		$options = [
