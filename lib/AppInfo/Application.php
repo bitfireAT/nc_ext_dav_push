@@ -15,8 +15,11 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 
 use OCA\DAV\Events\SabrePluginAddEvent;
 use OCA\DAV\Events\CalendarObjectCreatedEvent;
+use OCA\DAV\Events\CalendarObjectMovedToTrashEvent;
+use OCA\DAV\Events\CalendarObjectRestoredEvent;
 use OCA\DAV\Events\CalendarObjectDeletedEvent;
 use OCA\DAV\Events\CalendarObjectUpdatedEvent;
+use OCA\DAV\Events\CalendarObjectMovedEvent;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'dav_push';
@@ -28,8 +31,11 @@ class Application extends App implements IBootstrap {
 	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(SabrePluginAddEvent::class, SabrePluginAddListener::class);
 		$context->registerEventListener(CalendarObjectCreatedEvent::class, CalendarListener::class);
+		$context->registerEventListener(CalendarObjectMovedToTrashEvent::class, CalendarListener::class);
+		$context->registerEventListener(CalendarObjectRestoredEvent::class, CalendarListener::class);
         $context->registerEventListener(CalendarObjectDeletedEvent::class, CalendarListener::class);
         $context->registerEventListener(CalendarObjectUpdatedEvent::class, CalendarListener::class);
+		$context->registerEventListener(CalendarObjectMovedEvent::class, CalendarListener::class);
 	}
 
 	public function boot(IBootContext $context): void {

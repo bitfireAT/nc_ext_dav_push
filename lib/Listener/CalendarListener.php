@@ -30,8 +30,11 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 
 use OCA\DAV\Events\CalendarObjectCreatedEvent;
+use OCA\DAV\Events\CalendarObjectMovedToTrashEvent;
+use OCA\DAV\Events\CalendarObjectRestoredEvent;
 use OCA\DAV\Events\CalendarObjectDeletedEvent;
 use OCA\DAV\Events\CalendarObjectUpdatedEvent;
+use OCA\DAV\Events\CalendarObjectMovedEvent;
 use OCA\DAV\Events\CardCreatedEvent;
 use OCA\DAV\Events\CardDeletedEvent;
 use OCA\DAV\Events\CardUpdatedEvent;
@@ -51,12 +54,18 @@ class CalendarListener implements IEventListener {
 	) {}
 
     public function handle(Event $event): void {
-        if (!($event instanceOf CalendarObjectCreatedEvent) && !($event instanceOf CalendarObjectDeletedEvent) &&
-            !($event instanceOf CalendarObjectUpdatedEvent)) {
-            return;
+        if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
+            ($event instanceOf CalendarObjectUpdatedEvent) || ($event instanceOf CalendarObjectMovedToTrashEvent) ||
+			($event instanceOf CalendarObjectRestoredEvent)) {
+			$this->notifyAllForCalendar($event->getCalendarData());
         }
-
-		$calendarData = $event->getCalendarData();
+		
+		if($event instanceOf CalendarObjectMovedEvent) {
+			$this->notifyAllForCalendar($event->getSourceCalendarData());
+			$this->notifyAllForCalendar($event->getTargetCalendarData());
+		}
+    }
+	private function notifyAllForCalendar(array $calendarData): void {
 		$collectionName = $calendarData['uri'];
 		$syncToken = $calendarData['{http://sabredav.org/ns}sync-token'];
 		
@@ -70,5 +79,5 @@ class CalendarListener implements IEventListener {
 				$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
 			}
 		}
-    }
+	}
 }
