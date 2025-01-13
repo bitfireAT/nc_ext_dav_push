@@ -36,7 +36,7 @@ class WebhookTransport extends Transport {
 		$url = False;
 
 		foreach($options as $option) {
-			if($option["name"] == "{".PushSpec::PUSH_PREFIX."}endpoint") {
+			if($option["name"] == "{" . PushSpec::PUSH_PREFIX . "}endpoint") {
 				$url = $option["value"];
 			}
 		}

@@ -123,7 +123,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 		if(sizeof($subElements) == 1) {
 			// parse child element
 			$type = $subElements[0]["name"];
-			$type = str_replace('{'.PushSpec::PUSH_PREFIX.'}', '', $type);
+			$type = str_replace('{' . PushSpec::PUSH_PREFIX . '}', '', $type);
 			$type = preg_replace('/-subscription$/', '', $type);
 
 			$options = $subElements[0]["value"];

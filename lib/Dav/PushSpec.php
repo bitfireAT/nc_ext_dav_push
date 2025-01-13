@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\Dav;
 
-class PushSpec {
+abstract class PushSpec {
 
 	public const PUSH_PREFIX = '{https://bitfire.at/webdav-push}';
 
