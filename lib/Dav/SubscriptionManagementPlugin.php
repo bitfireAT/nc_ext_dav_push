@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\Dav;
 
+use OCA\DavPush\Dav\PushSpec;
 use OCA\DavPush\Transport\TransportManager;
 use OCA\DavPush\Db\Subscription;
 use OCA\DavPush\Service\SubscriptionService;
@@ -103,7 +104,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 		if(sizeof($errors) === 0) {
 			return [
 				"errors" => [],
-				"subscriptionType" => $parsedSubscriptionElement["type"],
+				"subscriptionType" => str_replace(PushSpec::PUSH_PREFIX, "", $parsedSubscriptionElement["type"]),
 				"subscriptionOptions" => $parsedSubscriptionElement["options"],
 				"requestedSubscriptionExpiration" => $parsedExpiresElement,
 			];
@@ -122,7 +123,7 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 		if(sizeof($subElements) == 1) {
 			// parse child element
 			$type = $subElements[0]["name"];
-			$type = preg_replace('/^\{DAV:Push\}/', '', $type);
+			$type = str_replace('{' . PushSpec::PUSH_PREFIX . '}', '', $type);
 			$type = preg_replace('/-subscription$/', '', $type);
 
 			$options = $subElements[0]["value"];

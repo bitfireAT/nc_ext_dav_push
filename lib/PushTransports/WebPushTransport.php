@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\PushTransports;
 
+use OCA\DavPush\Dav\PushSpec;
 use OCA\DavPush\Transport\Transport;
 use OCA\DavPush\Service\WebPushSubscriptionService;
 use OCA\DavPush\Errors\WebPushSubscriptionNotFound;
@@ -43,7 +44,7 @@ class WebPushTransport extends Transport {
 		$result = [];
 
 		foreach($options as $option) {
-			if ($option["name"] == "{DAV:Push}push-resource") {
+			if ($option["name"] == PushSpec::PROPERTY_PUSH_RESOURCE) {
 				$result["pushResource"] = $option["value"];
 			}
 		}
@@ -85,8 +86,12 @@ class WebPushTransport extends Transport {
 
 		$pushResource = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId)->getPushResource();
 
-		$content = $xmlService->write('{DAV:Push}push-message', [
-			'{DAV:Push}topic' => $collectionName,
+		$content = $xmlService->write(PushSpec::PUSH_MESSAGE, [
+			'{DAV:}propstat' => [
+				'{DAV:}prop' => [
+					PushSpec::PROPERTY_TOPIC => $collectionName
+				]
+			],
 		]);
 
 		$options = [

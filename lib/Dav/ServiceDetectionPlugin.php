@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\Dav;
 
+use OCA\DavPush\Dav\PushSpec;
 use OCA\DavPush\Transport\TransportManager;
 
 use OCP\IUser;
@@ -42,11 +43,6 @@ use Sabre\DAV\ServerPlugin;
 
 class ServiceDetectionPlugin extends ServerPlugin {
 
-	public const PUSH_PREFIX = '{DAV:Push}';
-	public const PROPERTY_PUSH_TRANSPORTS = self::PUSH_PREFIX . 'push-transports';
-	public const PROPERTY_PUSH_TOPIC = self::PUSH_PREFIX . 'topic';
-
-
 	public function __construct(
 		private IUserSession $userSession,
 		private TransportManager $transportManager,
@@ -58,7 +54,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 	}
 
 	public function propFind(PropFind $propFind, INode $node) {
-		if (count(array_intersect([self::PROPERTY_PUSH_TRANSPORTS, self::PROPERTY_PUSH_TOPIC], $propFind->getRequestedProperties())) == 0) {
+		if (count(array_intersect([PushSpec::PROPERTY_TRANSPORTS, PushSpec::PROPERTY_TOPIC], $propFind->getRequestedProperties())) == 0) {
 			return;
 		}
 
@@ -67,7 +63,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 		}
 
 		$propFind->handle(
-			self::PROPERTY_PUSH_TRANSPORTS,
+			PushSpec::PROPERTY_TRANSPORTS,
 			function () use ($node) {
 				//$user = $this->userSession->getUser();
 				//if (!($user instanceof IUser)) {
@@ -80,9 +76,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 				
 				foreach($transports as $transport) {
 					$result[] = [
-						(self::PUSH_PREFIX . "transport") => [
-							(self::PUSH_PREFIX . $transport->getId()) => $transport->getAdditionalInformation(),
-						]
+						(PushSpec::PUSH_PREFIX . $transport->getId()) => $transport->getAdditionalInformation(),
 					];
 				}
 
@@ -93,7 +87,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 		);
 
 		$propFind->handle(
-			self::PROPERTY_PUSH_TOPIC,
+			PushSpec::PROPERTY_TOPIC,
 			//function () use ($node) {
 				//$user = $this->userSession->getUser();
 				//if (!($user instanceof IUser)) {
