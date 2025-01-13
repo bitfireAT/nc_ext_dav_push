@@ -56,13 +56,16 @@ class CalendarListener implements IEventListener {
             return;
         }
 
-		$collectionName = $event->getCalendarData()['uri'];
+		$calendarData = $event->getCalendarData();
+		$collectionName = $calendarData['uri'];
+		$syncToken = $calendarData['{http://sabredav.org/ns}sync-token'];
+		
 		$subscriptions = $this->subscriptionService->findAll($collectionName);
 
 		foreach($subscriptions as $subscription) {
 			$transport = $this->transportManager->getTransport($subscription->getTransport());
 			try {
-				$transport->notify($subscription->getUserId(), $collectionName, $subscription->getId());
+				$transport->notify($subscription->getId(), $subscription->getUserId(), $collectionName, $syncToken);
 			} catch (\Exception $e) {
 				$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
 			}

@@ -69,7 +69,7 @@ abstract class Transport {
 	// Change mutable options of the subscription (if any exist)
 	abstract public function updateSubscription(int $subsciptionId, $options);
 
-	abstract public function notify(string $userId, string $collectionName, int $subscriptionId);
+	abstract public function notify(int $subscriptionId, string $userId, string $collectionName, ?string $syncToken);
 
 	// Delete the subscription
 	// Involves doing any transport specific de-registration work, deleting any data about this subscription in transport db tables
