@@ -12,10 +12,12 @@ class Subscription extends Entity implements JsonSerializable {
 	protected $transport;
 	protected $creationTimestamp;
 	protected $expirationTimestamp;
+	protected $failCounter;
 
 	public function __construct() {
 		$this->addType('creationTimestamp','integer');
 		$this->addType('expirationTimestamp','integer');
+		$this->addType('failCounter','integer');
 	}
 
 	public function jsonSerialize(): array {
@@ -25,7 +27,8 @@ class Subscription extends Entity implements JsonSerializable {
 			'collectionName' => $this->collectionName,
 			'transport' => $this->transport,
 			'creationTimestamp' => $this->creationTimestamp,
-			'expirationTimestamp' => $this->expirationTimestamp
+			'expirationTimestamp' => $this->expirationTimestamp,
+			'failCounter' => $this->failCounter,
 		];
 	}
 }

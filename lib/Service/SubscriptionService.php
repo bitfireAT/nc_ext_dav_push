@@ -55,12 +55,16 @@ class SubscriptionService {
 		return $subscription;
 	}
 
-	public function update(string $userId, int $id, ?int $expirationTimestamp) {
+	public function update(string $userId, int $id, ?int $expirationTimestamp = null, ?int $failCounter = null) {
 		try {
 			$subscription = $this->mapper->find($userId, $id);
 			
 			if (!is_null($expirationTimestamp)) {
 				$subscription->setExpirationTimestamp($expirationTimestamp);
+			}
+
+			if (!is_null($failCounter)) {
+				$subscription->setFailCounter($failCounter);
 			}
 
 			return $this->mapper->update($subscription);
