@@ -6,7 +6,9 @@ use JsonSerializable;
 
 use OCP\AppFramework\Db\Entity;
 
-class Subscription extends Entity implements JsonSerializable {
+use OCA\DavPush\Interface\TableSerializable;
+
+class Subscription extends Entity implements JsonSerializable, TableSerializable {
 	protected $userId;
 	protected $collectionName;
 	protected $transport;
@@ -29,6 +31,18 @@ class Subscription extends Entity implements JsonSerializable {
 			'creationTimestamp' => $this->creationTimestamp,
 			'expirationTimestamp' => $this->expirationTimestamp,
 			'failCounter' => $this->failCounter,
+		];
+	}
+
+	public function tableSerialize(?array $params = null): array {
+		return [
+			'Id' => $this->id,
+			'User Id' => $this->userId,
+			'DAV Collection Name' => $this->collectionName,
+			'Transport' => $this->transport,
+			'Creation Timestamp' => $this->creationTimestamp,
+			'Expiration Timestamp' => $this->expirationTimestamp,
+			'Fail Counter' => $this->failCounter,
 		];
 	}
 }
