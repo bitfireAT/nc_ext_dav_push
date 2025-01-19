@@ -33,6 +33,9 @@ This Nextcloud extension has been developed by [@verdigado](https://github.com/v
         <database>mysql</database>
         <nextcloud min-version="28" max-version="30"/>
     </dependencies>
+    <background-jobs>
+        <job>OCA\DavPush\BackgroundJob\SubscriptionsCleanup</job>
+    </background-jobs>
     <commands>
         <command>OCA\DavPush\Command\Subscription\ListSubscriptions</command>
         <command>OCA\DavPush\Command\Subscription\SubscriptionsCleanup</command>
