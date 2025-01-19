@@ -82,4 +82,9 @@ class SubscriptionService {
 			$this->handleException($e);
 		}
 	}
+
+	/** remove all subscriptions, that are expired or have failed to deliver notifications too often */
+	public function cleanupAll(): int {
+		return $this->mapper->cleanupAll();
+	}
 }
