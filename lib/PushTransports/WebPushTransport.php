@@ -81,6 +81,17 @@ class WebPushTransport extends Transport {
 		];
 	}
 
+	/**
+	* Encodes data with base64url
+	* @param string $string The data to encode.
+	* @return string The encoded data, as a string.
+	*/
+	private function base64url_encode($string) {
+	 $base64 = base64_encode($string);
+
+	 return rtrim(strtr($base64, '+/', '-_'), '=');
+   }
+
 	public function notify(int $subscriptionId, string $userId, string $collectionName, ?string $syncToken) {
 		$xmlService = new Service();
 
@@ -104,6 +115,10 @@ class WebPushTransport extends Transport {
 			'http' => [
 				'method' => 'POST',
 				'content' => $content,
+				'header' => [
+					'Content-Type: application/xml; charset="UTF-8"',
+					'Topic: ' . $this->base64url_encode(sha1($collectionName, true)),
+				],
 			],
 		];
 
