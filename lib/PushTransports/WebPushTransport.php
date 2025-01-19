@@ -77,7 +77,10 @@ class WebPushTransport extends Transport {
 
 		return [
 			'success' => True,
+			'errors' => [],
+			'responseStatus' => null, // use default
 			'response' => "",
+			'unsubscribeLink' => null, // use default
 		];
 	}
 
