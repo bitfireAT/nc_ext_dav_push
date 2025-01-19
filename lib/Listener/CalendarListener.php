@@ -43,6 +43,7 @@ use Psr\Log\LoggerInterface;
 
 use OCA\DavPush\Service\SubscriptionService;
 use OCA\DavPush\Transport\TransportManager;
+use OCA\DavPush\Helper\ErrorHandlingHelper;
 
 class CalendarListener implements IEventListener {
 
@@ -50,6 +51,7 @@ class CalendarListener implements IEventListener {
 		private LoggerInterface $logger,
 		private SubscriptionService $subscriptionService,
 		private TransportManager $transportManager,
+		private ErrorHandlingHelper $errorHandlingHelper,
 		private $userId,
 	) {}
 
@@ -71,13 +73,17 @@ class CalendarListener implements IEventListener {
 		
 		$subscriptions = $this->subscriptionService->findAll($collectionName);
 
-		foreach($subscriptions as $subscription) {
-			$transport = $this->transportManager->getTransport($subscription->getTransport());
-			try {
-				$transport->notify($subscription->getId(), $subscription->getUserId(), $collectionName, $syncToken);
-			} catch (\Exception $e) {
-				$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId());
+		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $collectionName, $syncToken) {
+			foreach($subscriptions as $subscription) {
+				$transport = $this->transportManager->getTransport($subscription->getTransport());
+	
+				try {
+					$transport->notify($subscription->getId(), $subscription->getUserId(), $collectionName, $syncToken);
+				} catch (\Throwable $e) {
+					$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId() . ". error message: " . $e->getMessage());
+					$this->subscriptionService->update($subscription->getUserId(), $subscription->getId(), failCounter: $subscription->getFailCounter() + 1);
+				}
 			}
-		}
+		});		
 	}
 }
