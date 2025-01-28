@@ -105,7 +105,7 @@ class WebPushTransport extends Transport {
 		$props[PushSpec::PROPERTY_TOPIC] = $collectionName;
 
 		if(isset($syncToken)) {
-			$props["{DAV}sync-token"] = $syncToken;
+			$props["{DAV:}sync-token"] = $syncToken;
 		}
 
 		$content = $xmlService->write(PushSpec::PUSH_MESSAGE, [
