@@ -47,7 +47,7 @@ use OCA\DavPush\Helper\ErrorHandlingHelper;
 
 class CalendarListener implements IEventListener {
 
-    public function __construct(
+	public function __construct(
 		private LoggerInterface $logger,
 		private SubscriptionService $subscriptionService,
 		private TransportManager $transportManager,
@@ -55,36 +55,37 @@ class CalendarListener implements IEventListener {
 		private $userId,
 	) {}
 
-    public function handle(Event $event): void {
-        if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
-            ($event instanceOf CalendarObjectUpdatedEvent) || ($event instanceOf CalendarObjectMovedToTrashEvent) ||
+	public function handle(Event $event): void {
+		if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
+			($event instanceOf CalendarObjectUpdatedEvent) || ($event instanceOf CalendarObjectMovedToTrashEvent) ||
 			($event instanceOf CalendarObjectRestoredEvent)) {
-			$this->notifyAllForCalendar($event->getCalendarData());
-        }
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getCalendarData()['id'], $event->getCalendarData()['{http://sabredav.org/ns}sync-token']);
+		}
 		
 		if($event instanceOf CalendarObjectMovedEvent) {
-			$this->notifyAllForCalendar($event->getSourceCalendarData());
-			$this->notifyAllForCalendar($event->getTargetCalendarData());
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getSourceCalendarData()['id'], $event->getSourceCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getTargetCalendarData()['id'], $event->getTargetCalendarData()['{http://sabredav.org/ns}sync-token']);
 		}
-    }
-	private function notifyAllForCalendar(array $calendarData): void {
-		$collectionName = $calendarData['uri'];
-		$syncToken = $calendarData['{http://sabredav.org/ns}sync-token'];
-		
-		$subscriptions = $this->subscriptionService->findAll($collectionName);
+	}
 
-		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $collectionName, $syncToken) {
+	private function notifyAllSubscriptionsToResource(string $resourceType, int $resourceId, string $syncToken): void {
+		$subscriptions = $this->subscriptionService->findAll($resourceType, $resourceId);
+
+		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $resourceType, $resourceId, $syncToken) {
 			foreach($subscriptions as $subscription) {
+				// TODO: The subscription was able to be registered and has not expired yet, that means the user had access to the resource as of recently,
+				//        but we need to check if that is actually still the case here
+
 				$transport = $this->transportManager->getTransport($subscription->getTransport());
 	
 				try {
-					$transport->notify($subscription->getId(), $subscription->getUserId(), $collectionName, $syncToken);
+					$transport->notify($subscription->getId(), $subscription->getUserId(), $resourceType, $resourceId, $syncToken);
 					$this->subscriptionService->update($subscription->getUserId(), $subscription->getId(), failCounter: 0);
 				} catch (\Throwable $e) {
 					$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId() . ". error message: " . $e->getMessage());
 					$this->subscriptionService->update($subscription->getUserId(), $subscription->getId(), failCounter: $subscription->getFailCounter() + 1);
 				}
 			}
-		});		
+		});
 	}
 }

@@ -56,9 +56,15 @@ class Version001Date20240515221000 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 200,
 			]);
-			$table->addColumn('collection_name', Types::STRING, [
+			// Either calendar or addressbook
+			$table->addColumn('resource_type', 'string', [
 				'notnull' => true,
-				'length' => 100,
+				'length' => 255,
+			]);
+			$table->addColumn('resource_id', Types::BIGINT, [
+				'notnull' => true,
+				'length' => 11,
+				'unsigned' => true,
 			]);
 			$table->addColumn('transport', Types::STRING, [
 				'notnull' => true,

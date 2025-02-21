@@ -59,17 +59,17 @@ abstract class Transport {
 	*/
 	abstract public function registerSubscription($subsciptionId, $options);
 
-	// Transport needs to be able to map subscription options + userId + collectionName back to a subscription id.
+	// Transport needs to be able to map subscription options + userId + resourceType + resourceId back to a subscription id.
 	// API Requests to create and update a subscription are the same, therefore if a subscription id is associated with the given options the subscription is updated, otherwise a new subscription is added.
 	// Which option(s) uniquely identify a subscription is implementation specific.
-	// Options themselves do not necessarily uniquely identify a subscription, but combined with userId and collectionName it does.
-	// It is not recommended for transports to save userId and collectionName for themselves for this, you can just use a join with the general subscriptions table.
-	abstract public function getSubscriptionIdFromOptions(string $userId, string $collectionName, $options): ?int;
+	// Options themselves do not necessarily uniquely identify a subscription, but combined with userId, resourceType and resourceId it does.
+	// It is not recommended for transports to save userId, resourceType or resourceId for themselves for this, you can just use a join with the general subscriptions table.
+	abstract public function getSubscriptionIdFromOptions(string $userId, string $resourceType, int $resourceId, $options): ?int;
 
 	// Change mutable options of the subscription (if any exist)
 	abstract public function updateSubscription(int $subsciptionId, $options);
 
-	abstract public function notify(int $subscriptionId, string $userId, string $collectionName, ?string $syncToken);
+	abstract public function notify(int $subscriptionId, string $userId, string $resourceType, int $resourceId, ?string $syncToken);
 
 	// Delete the subscription
 	// Involves doing any transport specific de-registration work, deleting any data about this subscription in transport db tables

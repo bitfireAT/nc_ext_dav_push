@@ -38,7 +38,7 @@ class WebPushSubscriptionMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function findByPushResource(string $userId, string $collectionName, string $pushResource): WebPushSubscription {
+	public function findByPushResource(string $userId, string $resourceType, int $resourceId, string $pushResource): WebPushSubscription {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('webpush.*')
@@ -48,7 +48,8 @@ class WebPushSubscriptionMapper extends QBMapper {
 
 		$qb->where($qb->expr()->eq('webpush.push_resource', $qb->createNamedParameter($pushResource)))
 			->andWhere($qb->expr()->eq('subscription.user_id', $qb->createNamedParameter($userId)))
-			->andWhere($qb->expr()->eq('subscription.collection_name', $qb->createNamedParameter($collectionName)));
+			->andWhere($qb->expr()->eq('subscription.resource_type', $qb->createNamedParameter($resourceType)))
+			->andWhere($qb->expr()->eq('subscription.resource_id', $qb->createNamedParameter($resourceId, IQueryBuilder::PARAM_INT)));
 		
 		return $this->findEntity($qb);
 	}

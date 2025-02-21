@@ -176,6 +176,14 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 
 		$node = $this->server->tree->getNodeForPath($this->server->getRequestUri());
 
+		if(($node instanceof \OCA\DAV\CalDAV\Calendar)) {
+			$resourceType = "calendar";
+		} else if($node instanceof \OCA\DAV\CardDAV\AddressBook) {
+			$resourceType = "addressbook";
+		} else {
+			return;
+		}
+
 		$requestBody = $request->getBodyAsString();
 
 		// If this request handler could not deal with this POST request, it
@@ -225,13 +233,13 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 					} else {
 						$user = $this->userSession->getUser();
 	
-						$existingSubscriptionId = $transport->getSubscriptionIdFromOptions($user->getUID(), $node->getName(), $subscriptionOptions);
+						$existingSubscriptionId = $transport->getSubscriptionIdFromOptions($user->getUID(), $resourceType, $node->getResourceId(), $subscriptionOptions);
 	
 						if(!is_int($existingSubscriptionId)) {
 							try {
 								// create new subscription entry in db and register with transport. If the transport register fails roll back db transaction
-								$this->atomic(function () use ($user, $node, $subscriptionType, $subscriptionExpires, $subscriptionOptions, &$subscription, $transport, &$errors, &$responseStatus, &$responseContent, &$unsubscribeLink) {
-									$subscription = $this->subscriptionService->create($user->getUID(), $node->getName(), $subscriptionType, $subscriptionExpires);
+								$this->atomic(function () use ($user, $resourceType, $node, $subscriptionType, $subscriptionExpires, $subscriptionOptions, &$subscription, $transport, &$errors, &$responseStatus, &$responseContent, &$unsubscribeLink) {
+									$subscription = $this->subscriptionService->create($user->getUID(), $resourceType, $node->getResourceId(), $subscriptionType, $subscriptionExpires);
 
 									[
 										'success' => $registerSuccess,
@@ -260,8 +268,8 @@ class SubscriptionManagementPlugin extends ServerPlugin {
 							// implicitly checks if subscription found by transport is really owned by correct user
 							$subscription = $this->subscriptionService->find($user->getUID(), $existingSubscriptionId);
 							
-							// check if subscription found by transport is really for correct collection
-							if($subscription->getCollectionName() !== $node->getName()) {
+							// check if subscription found by transport is really for correct calendar/addressbook
+							if($subscription->getResourceType() !== $resourceType || $subscription->getResourceId() !== $node->getResourceId()) {
 								$errors[] = "subscription update error";
 							} else {
 								[

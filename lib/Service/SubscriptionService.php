@@ -18,8 +18,8 @@ class SubscriptionService {
 	) {
 	}
 
-	public function findAll(string $collectionName): array {
-		return $this->mapper->findAll($collectionName);
+	public function findAll(string $resourceType, int $resourceId): array {
+		return $this->mapper->findAll($resourceType, $resourceId);
 	}
 
 	public function findAllByUser(string $userId): array {
@@ -43,10 +43,11 @@ class SubscriptionService {
 		}
 	}
 
-	public function create(string $userId, string $collectionName, string $transport, int $expirationTimestamp, ?int $creationTimestamp = null) {
+	public function create(string $userId, string $resourceType, int $resourceId, string $transport, int $expirationTimestamp, ?int $creationTimestamp = null) {
 		$subscription = new Subscription();
 		$subscription->setUserId($userId);
-		$subscription->setCollectionName($collectionName);
+		$subscription->setResourceType($resourceType);
+		$subscription->setResourceId($resourceId);
 		$subscription->setTransport($transport);
 		$subscription->setCreationTimestamp($creationTimestamp ?? time());
 		$subscription->setExpirationTimestamp($expirationTimestamp);

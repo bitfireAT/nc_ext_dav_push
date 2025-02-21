@@ -33,9 +33,6 @@ use OCA\DavPush\Transport\TransportManager;
 use OCP\IUser;
 use OCP\IUserSession;
 
-use OCP\AppFramework\Db\DoesNotExistException;
-use OCA\DAV\CalDAV\Calendar;
-
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\Server;
@@ -58,7 +55,11 @@ class ServiceDetectionPlugin extends ServerPlugin {
 			return;
 		}
 
-		if (!($node instanceof Calendar)) {
+		if(($node instanceof \OCA\DAV\CalDAV\Calendar)) {
+			$resourceType = "calendar";
+		} else if($node instanceof \OCA\DAV\CardDAV\AddressBook) {
+			$resourceType = "addressbook";
+		} else {
 			return;
 		}
 
@@ -96,7 +97,7 @@ class ServiceDetectionPlugin extends ServerPlugin {
 
 			//	return "test-return-push";
 			//},
-			$node->getName()
+			$resourceType . "-" . $node->getResourceId(),
 		);
 	}
 }
