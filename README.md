@@ -17,7 +17,7 @@ It is the server part of our efforts to draft a WebDAV-Push standard and provide
 > [!WARNING] 
 > This extension is in an early stage of development. It is for demonstration and testing purposes only. Don't use it on production systems!
 
-For instance, push subscriptions currently don't expire and won't be removed when they have become invalid. So the table will grow bigger and bigger and everything will become slow over time. You can however install/enable the extension to test it and disable or remove it again at any time. When the extension is disabled, it doesn't influence your system.
+You can however install/enable the extension to test it and disable or remove it again at any time. When the extension is disabled, it doesn't influence your system.
 
 
 ## About WebDAV-Push
