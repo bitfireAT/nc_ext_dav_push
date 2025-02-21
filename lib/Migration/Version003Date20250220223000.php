@@ -38,28 +38,28 @@ use Psr\Log\LoggerInterface;
 class Version003Date20250220223000 extends SimpleMigrationStep {
 	public const SUBSCRIPTIONS_TABLE = "dav_push_subscriptions";
 
-    public function __construct(
+	public function __construct(
 		private IDBConnection $connection,
-        private LoggerInterface $logger,
+		private LoggerInterface $logger,
 	) {}
 
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
-        /** @var ISchemaWrapper $schema */
+	public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
+		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
-        $table = $schema->getTable(self::SUBSCRIPTIONS_TABLE);
+		$table = $schema->getTable(self::SUBSCRIPTIONS_TABLE);
 
-        // this migration was made specifically to allow a migration path from alpha version 0.0.2 to 0.0.3 (even though our alpha releases generally do not guarantee a migration path)
-        // not needed for instances that started on a later version and therefore never had the collection_name column
-        if($table->hasColumn("collection_name")) {
-            $this->logger->debug("dav_push was initially installed on this instance before alpha version 0.0.3, all subscriptions will be cleared to provide a migration path to more modern versions");
-            // clear all subscriptions created with the old way of referencing calendars
-            $this->connection
-                ->getQueryBuilder()
-                ->delete(self::SUBSCRIPTIONS_TABLE)
-                ->executeStatement();
-        } else {
-            $this->logger->debug("dav_push was initially installed on this instance after alpha version 0.0.3, migration Version003Date20250220223000 is not needed and wil NOOP");
-        }
+		// this migration was made specifically to allow a migration path from alpha version 0.0.2 to 0.0.3 (even though our alpha releases generally do not guarantee a migration path)
+		// not needed for instances that started on a later version and therefore never had the collection_name column
+		if($table->hasColumn("collection_name")) {
+			$this->logger->debug("dav_push was initially installed on this instance before alpha version 0.0.3, all subscriptions will be cleared to provide a migration path to more modern versions");
+			// clear all subscriptions created with the old way of referencing calendars
+			$this->connection
+				->getQueryBuilder()
+				->delete(self::SUBSCRIPTIONS_TABLE)
+				->executeStatement();
+		} else {
+			$this->logger->debug("dav_push was initially installed on this instance after alpha version 0.0.3, migration Version003Date20250220223000 is not needed and wil NOOP");
+		}
 	}
 
 	/**
@@ -71,21 +71,21 @@ class Version003Date20250220223000 extends SimpleMigrationStep {
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options) {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
-        $table = $schema->getTable(self::SUBSCRIPTIONS_TABLE);
+		$table = $schema->getTable(self::SUBSCRIPTIONS_TABLE);
 
-        if($table->hasColumn("collection_name")) {
-            // Either calendar or addressbook
-            $table->addColumn('resource_type', 'string', [
+		if($table->hasColumn("collection_name")) {
+			// Either calendar or addressbook
+			$table->addColumn('resource_type', 'string', [
 				'notnull' => true,
 				'length' => 255,
 			]);
-            $table->addColumn('resource_id', Types::BIGINT, [
-                'notnull' => true,
+			$table->addColumn('resource_id', Types::BIGINT, [
+				'notnull' => true,
 				'length' => 11,
 				'unsigned' => true,
-            ]);
-            $table->dropColumn('collection_name');
-        }
+			]);
+			$table->dropColumn('collection_name');
+		}
 
 		return $schema;
 	}

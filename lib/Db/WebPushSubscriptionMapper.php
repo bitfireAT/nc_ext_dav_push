@@ -32,7 +32,7 @@ class WebPushSubscriptionMapper extends QBMapper {
 		return $this->findEntity($qb);
 	}
 
-    /**
+	/**
 	 * @param string $pushResource
 	 * @return Entity|WebPushSubscription
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
