@@ -55,9 +55,7 @@ class WebPushTransport extends Transport {
 	public function validateOptions($options): array {
 		['pushResource' => $pushResource] = $this->parseOptions($options);
 
-		// TODO: check if string is valid URL
-
-		if(isset($pushResource) && $pushResource !== '') {
+		if(isset($pushResource) && $this->validPushResource($pushResource)) {
 			return [
 				'valid' => True,
 				'errors' => [],
@@ -68,6 +66,10 @@ class WebPushTransport extends Transport {
 				'errors' => ["push resource not provided"]
 			];
 		}
+	}
+
+	private function validPushResource(string $url): bool {
+		return (str_starts_with($url, 'https://') && filter_var($url, FILTER_VALIDATE_URL) !== false);
 	}
 
 	public function registerSubscription($subsciptionId, $options) {
