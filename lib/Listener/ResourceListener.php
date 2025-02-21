@@ -35,9 +35,11 @@ use OCA\DAV\Events\CalendarObjectRestoredEvent;
 use OCA\DAV\Events\CalendarObjectDeletedEvent;
 use OCA\DAV\Events\CalendarObjectUpdatedEvent;
 use OCA\DAV\Events\CalendarObjectMovedEvent;
+
 use OCA\DAV\Events\CardCreatedEvent;
-use OCA\DAV\Events\CardDeletedEvent;
 use OCA\DAV\Events\CardUpdatedEvent;
+use OCA\DAV\Events\CardDeletedEvent;
+use OCA\DAV\Events\CardMovedEvent;
 
 use Psr\Log\LoggerInterface;
 
@@ -45,7 +47,7 @@ use OCA\DavPush\Service\SubscriptionService;
 use OCA\DavPush\Transport\TransportManager;
 use OCA\DavPush\Helper\ErrorHandlingHelper;
 
-class CalendarListener implements IEventListener {
+class ResourceListener implements IEventListener {
 
 	public function __construct(
 		private LoggerInterface $logger,
@@ -59,12 +61,21 @@ class CalendarListener implements IEventListener {
 		if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
 			($event instanceOf CalendarObjectUpdatedEvent) || ($event instanceOf CalendarObjectMovedToTrashEvent) ||
 			($event instanceOf CalendarObjectRestoredEvent)) {
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getCalendarData()['id'], $event->getCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getCalendarId(), $event->getCalendarData()['{http://sabredav.org/ns}sync-token']);
 		}
 		
 		if($event instanceOf CalendarObjectMovedEvent) {
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getSourceCalendarData()['id'], $event->getSourceCalendarData()['{http://sabredav.org/ns}sync-token']);
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getTargetCalendarData()['id'], $event->getTargetCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getSourceCalendarId(), $event->getSourceCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getTargetCalendarId(), $event->getTargetCalendarData()['{http://sabredav.org/ns}sync-token']);
+		}
+
+		if (($event instanceOf CardCreatedEvent) || ($event instanceOf CardUpdatedEvent) || ($event instanceOf CardDeletedEvent)) {
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getAddressBookId(), $event->getAddressBookData()['{http://sabredav.org/ns}sync-token']);
+		}
+
+		if($event instanceOf CardMovedEvent) {
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getSourceAddressBookId(), $event->getSourceAddressBookData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getTargetAddressBookId(), $event->getTargetAddressBookData()['{http://sabredav.org/ns}sync-token']);
 		}
 	}
 
