@@ -34,16 +34,18 @@ class SubscriptionMapper extends QBMapper {
 	}
 
 	/**
-	 * @param string $collectionName
+	 * @param string resourceType
+	 * @param int resourceId
 	 * @return Subscription[]
 	 */
-	public function findAll(string $collectionName): array {
+	public function findAll(string $resourceType, int $resourceId): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
 			->from(self::TABLENAME)
-			->where($qb->expr()->eq('collection_name', $qb->createNamedParameter($collectionName)));
+			->where($qb->expr()->eq('resource_type', $qb->createNamedParameter($resourceType)))
+			->andWhere($qb->expr()->eq('resource_id', $qb->createNamedParameter($resourceId, IQueryBuilder::PARAM_INT)));
 		
 		return $this->findEntities($qb);
 	}
@@ -76,6 +78,8 @@ class SubscriptionMapper extends QBMapper {
 				$qb->expr()->gt('fail_counter', $qb->createNamedParameter($maxFails, IQueryBuilder::PARAM_INT)),
 				$qb->expr()->lt('expiration_timestamp', $qb->createNamedParameter(time(), IQueryBuilder::PARAM_INT)),
 			));
+
+		// TODO: call transport deleteSubscription
 		
 		return $qb->executeStatement();
 	}

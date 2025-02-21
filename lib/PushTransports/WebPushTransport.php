@@ -95,14 +95,16 @@ class WebPushTransport extends Transport {
 	 return rtrim(strtr($base64, '+/', '-_'), '=');
    }
 
-	public function notify(int $subscriptionId, string $userId, string $collectionName, ?string $syncToken) {
+	public function notify(int $subscriptionId, string $userId, string $resourceType, int $resourceId, ?string $syncToken) {
 		$xmlService = new Service();
 
 		$pushResource = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId)->getPushResource();
 
 		$props = [];
 
-		$props[PushSpec::PROPERTY_TOPIC] = $collectionName;
+		$topic = $resourceType . "-" . $resourceId;
+
+		$props[PushSpec::PROPERTY_TOPIC] = $topic;
 
 		if(isset($syncToken)) {
 			$props["{DAV:}sync-token"] = $syncToken;
@@ -120,7 +122,7 @@ class WebPushTransport extends Transport {
 				'content' => $content,
 				'header' => [
 					'Content-Type: application/xml; charset="UTF-8"',
-					'Topic: ' . $this->base64url_encode(sha1($collectionName, true)),
+					'Topic: ' . $this->base64url_encode(sha1($topic, true)),
 				],
 			],
 		];
@@ -129,11 +131,11 @@ class WebPushTransport extends Transport {
 		$result = file_get_contents($pushResource, false, $context);
 	}
 
-	public function getSubscriptionIdFromOptions(string $userId, string $collectionName, $options): ?int {
+	public function getSubscriptionIdFromOptions(string $userId, string $resourceType, int $resourceId, $options): ?int {
 		['pushResource' => $pushResource] = $this->parseOptions($options);
 
 		try {
-			return $this->webPushSubscriptionService->findByPushResource($userId, $collectionName, $pushResource)->getSubscriptionId();
+			return $this->webPushSubscriptionService->findByPushResource($userId, $resourceType, $resourceId, $pushResource)->getSubscriptionId();
 		} catch (WebPushSubscriptionNotFound $e) {
 			return null;
 		}
@@ -143,6 +145,7 @@ class WebPushTransport extends Transport {
 		// there are no options which can be edited -> NOOP
 		return [
 			'success' => True,
+			'errors' => [],
 			'response' => "",
 		];
 	}

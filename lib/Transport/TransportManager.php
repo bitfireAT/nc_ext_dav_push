@@ -31,7 +31,6 @@ use OCP\Server;
 
 use OCA\DavPush\Events\RegisterTransportsEvent;
 use OCA\DavPush\PushTransports\WebPushTransport;
-//use OCA\DavPush\PushTransports\WebhookTransport;
 
 class TransportManager {
 	private array $transports = [];
@@ -41,7 +40,6 @@ class TransportManager {
 	) {
 		// register integrated transports
 		$this->registerTransport(Server::get(WebPushTransport::class));
-		//$this->registerTransport(ContainerInterface::get(WebhookTransport::class));
 
 		// register transports provided by other apps
 		$event = new RegisterTransportsEvent($this);

@@ -45,12 +45,12 @@ class Version002Date20250119180000 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-        $table = $schema->getTable(self::SUBSCRIPTIONS_TABLE);
+		$table = $schema->getTable(self::SUBSCRIPTIONS_TABLE);
 
-        $table->addColumn('fail_counter', Types::INTEGER, [
-            'notnull' => true,
-            'default' => 0,
-        ]);
+		$table->addColumn('fail_counter', Types::INTEGER, [
+			'notnull' => true,
+			'default' => 0,
+		]);
 
 		return $schema;
 	}

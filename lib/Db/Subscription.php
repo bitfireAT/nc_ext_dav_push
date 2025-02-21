@@ -10,13 +10,15 @@ use OCA\DavPush\Interface\TableSerializable;
 
 class Subscription extends Entity implements JsonSerializable, TableSerializable {
 	protected $userId;
-	protected $collectionName;
+	protected $resourceType;
+	protected $resourceId;
 	protected $transport;
 	protected $creationTimestamp;
 	protected $expirationTimestamp;
 	protected $failCounter;
 
 	public function __construct() {
+		$this->addType('resourceId','integer');
 		$this->addType('creationTimestamp','integer');
 		$this->addType('expirationTimestamp','integer');
 		$this->addType('failCounter','integer');
@@ -26,7 +28,8 @@ class Subscription extends Entity implements JsonSerializable, TableSerializable
 		return [
 			'id' => $this->id,
 			'userId' => $this->userId,
-			'collectionName' => $this->collectionName,
+			'resourceType' => $this->resourceType,
+			'resourceId' => $this->resourceId,
 			'transport' => $this->transport,
 			'creationTimestamp' => $this->creationTimestamp,
 			'expirationTimestamp' => $this->expirationTimestamp,
@@ -37,8 +40,9 @@ class Subscription extends Entity implements JsonSerializable, TableSerializable
 	public function tableSerialize(?array $params = null): array {
 		return [
 			'Id' => $this->id,
-			'User Id' => $this->userId,
-			'DAV Collection Name' => $this->collectionName,
+			'User ID' => $this->userId,
+			'Resource Type' => $this->resourceType,
+			'Resource ID' => $this->resourceId,
 			'Transport' => $this->transport,
 			'Creation Timestamp' => $this->creationTimestamp,
 			'Expiration Timestamp' => $this->expirationTimestamp,
