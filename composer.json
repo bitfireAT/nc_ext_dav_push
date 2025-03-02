@@ -1,0 +1,13 @@
+{
+    "name": "bitfireat/nc_ext_dav_push",
+    "type": "project",
+    "require": {
+    },
+    "license": "AGPL",
+    "authors": [
+        {
+            "name": "Jonathan Treffler",
+            "email": "mail@jonathan-treffler.com"
+        }
+    ]
+}
