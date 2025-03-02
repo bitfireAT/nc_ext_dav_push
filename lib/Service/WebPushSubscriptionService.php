@@ -43,10 +43,14 @@ class WebPushSubscriptionService {
 		}
     }
 
-	public function create(int $subscriptionId, string $pushResource): WebPushSubscription {
+	public function create(int $subscriptionId, string $pushResource, string $clientPublicKeyType, string $clientPublicKey, string $authSecret): WebPushSubscription {
 		$webPushSubscription = new WebPushSubscription();
 		$webPushSubscription->setSubscriptionId($subscriptionId);
 		$webPushSubscription->setPushResource($pushResource);
+		$webPushSubscription->setClientPublicKeyType($clientPublicKeyType);
+		$webPushSubscription->setClientPublicKey($clientPublicKey);
+		$webPushSubscription->setAuthSecret($authSecret);
+
 		$webPushSubscription = $this->mapper->insert($webPushSubscription);
 
 		return $webPushSubscription;
