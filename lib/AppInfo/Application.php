@@ -27,6 +27,8 @@ use OCA\DAV\Events\CardUpdatedEvent;
 use OCA\DAV\Events\CardDeletedEvent;
 use OCA\DAV\Events\CardMovedEvent;
 
+include_once __DIR__ . '/../../vendor/autoload.php';
+
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'dav_push';
 
