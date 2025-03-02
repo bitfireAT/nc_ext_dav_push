@@ -9,3 +9,5 @@ krankerl.toml
 screenshots
 .nextcloudignore
 .vscode
+/vendor/bin
+/vendor-bin

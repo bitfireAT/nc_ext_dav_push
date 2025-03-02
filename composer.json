@@ -1,13 +1,56 @@
 {
     "name": "bitfireat/nc_ext_dav_push",
     "type": "project",
-    "require": {
-    },
     "license": "AGPL",
     "authors": [
         {
             "name": "Jonathan Treffler",
             "email": "mail@jonathan-treffler.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "OCA\\DavPush\\": "lib/"
+        }
+    },
+    "require": {
+        "minishlink/web-push": "v9.0.2"
+    },
+    "require-dev": {
+        "bamarni/composer-bin-plugin": "^1.8"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "autoloader-suffix": "DavPush",
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        }
+    },
+    "extra": {
+        "bamarni-bin": {
+            "bin-links": true,
+            "forward-command": true
+        },
+        "mozart": {
+            "dep_namespace": "OCA\\DavPush\\Vendor\\",
+            "dep_directory": "/lib/Vendor/",
+            "classmap_directory": "/lib/autoload/",
+            "classmap_prefix": "DAVPUSH_",
+            "packages": [
+                "minishlink/web-push"
+            ]
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "[ $COMPOSER_DEV_MODE -eq 0 ] || composer bin all install --ansi",
+            "\"vendor/bin/mozart\" compose",
+            "composer dump-autoload"
+        ],
+        "post-update-cmd": [
+            "[ $COMPOSER_DEV_MODE -eq 0 ] || composer bin all update --ansi",
+            "\"vendor/bin/mozart\" compose",
+            "composer dump-autoload"
+        ]
+    }
 }
