@@ -26,19 +26,91 @@ declare(strict_types=1);
 
 namespace OCA\DavPush\PushTransports;
 
+use OCA\DavPush\AppInfo\Application;
 use OCA\DavPush\Dav\PushSpec;
 use OCA\DavPush\Transport\Transport;
 use OCA\DavPush\Service\WebPushSubscriptionService;
 use OCA\DavPush\Errors\WebPushSubscriptionNotFound;
 
+use OCP\IAppConfig;
+
 use Sabre\Xml\Service;
+use OCA\DavPush\Vendor\Minishlink\WebPush\VAPID;
 
 class WebPushTransport extends Transport {
 	protected $id = "web-push";
 
 	public function __construct(
-		private WebPushSubscriptionService $webPushSubscriptionService,
+		private readonly WebPushSubscriptionService $webPushSubscriptionService,
+		private readonly IAppConfig $appConfig,
 	) {}
+
+	public function getAdditionalInformation() {
+		return [
+			"server-public-key" => $this->getVapidPublicKey(),
+		];
+	}
+
+	private function getVapidPublicKey() {
+		$publicKey = $this->appConfig->getValueString(
+			Application::APP_ID,
+			'web_push_vapid_public_key',
+			lazy: true,
+		);
+
+		if($publicKey !== '') {
+			return $publicKey;
+		} else {
+			return $this->generateVapidKeys()["publicKey"];
+		}
+	}
+
+	private function getVapidPrivateKey() {
+		$privateKey = $this->appConfig->getValueString(
+			Application::APP_ID,
+			'web_push_vapid_private_key',
+			lazy: true,
+		);
+
+		if($privateKey !== '') {
+			return $privateKey;
+		} else {
+			return $this->generateVapidKeys()["privateKey"];
+		}
+	}
+
+	/**
+	 * Generate new VAPID keys
+	 * Overwrites previous keys!
+	 * Only call if keys have not been generated yet
+	 */
+	private function generateVapidKeys() {
+		[
+			"publicKey" => $publicKey,
+			"privateKey" => $privateKey,
+		] = VAPID::createVapidKeys();
+
+		$this->appConfig->setValueString(
+			Application::APP_ID,
+			'web_push_vapid_public_key',
+			$publicKey,
+			lazy: true,
+			sensitive: true
+		);
+
+		$this->appConfig->setValueString(
+			Application::APP_ID,
+			'web_push_vapid_private_key',
+			$privateKey,
+			lazy: true,
+			sensitive: true
+		);
+
+		return [
+			"publicKey" => $publicKey,
+			"privateKey" => $privateKey,
+		];
+	}
 
 	private function parseOptions(array $options): array {
 		$result = [];
@@ -92,10 +164,9 @@ class WebPushTransport extends Transport {
 	* @return string The encoded data, as a string.
 	*/
 	private function base64url_encode($string) {
-	 $base64 = base64_encode($string);
-
-	 return rtrim(strtr($base64, '+/', '-_'), '=');
-   }
+		$base64 = base64_encode($string);
+		return rtrim(strtr($base64, '+/', '-_'), '=');
+   	}
 
 	public function notify(int $subscriptionId, string $userId, string $resourceType, int $resourceId, ?string $syncToken) {
 		$xmlService = new Service();
