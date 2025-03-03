@@ -33,16 +33,23 @@ use OCA\DavPush\Service\WebPushSubscriptionService;
 use OCA\DavPush\Errors\WebPushSubscriptionNotFound;
 
 use OCP\IAppConfig;
+use OCP\IURLGenerator;
 
 use Sabre\Xml\Service;
+use OCA\DavPush\Vendor\Minishlink\WebPush\WebPush;
 use OCA\DavPush\Vendor\Minishlink\WebPush\VAPID;
+use OCA\DavPush\Vendor\Minishlink\WebPush\Subscription;
+use RuntimeException;
 
 class WebPushTransport extends Transport {
+	private const VALID_CLIENT_PUBLIC_KEY_TYPES = ["p256dh"];
+
 	protected $id = "web-push";
 
 	public function __construct(
 		private readonly WebPushSubscriptionService $webPushSubscriptionService,
 		private readonly IAppConfig $appConfig,
+		private readonly IURLGenerator $URLGenerator,
 	) {}
 
 	public function getAdditionalInformation() {
@@ -118,6 +125,11 @@ class WebPushTransport extends Transport {
 		foreach($options as $option) {
 			if ($option["name"] == PushSpec::PROPERTY_PUSH_RESOURCE) {
 				$result["pushResource"] = $option["value"];
+			} else if ($option["name"] == PushSpec::PROPERTY_CLIENT_PUBLIC_KEY) {
+				$result["clientPublicKeyType"] = $option["attributes"]["type"];
+				$result["clientPublicKey"] = $option["value"];
+			} else if ($option["name"] == PushSpec::PROPERTY_AUTH_SECRET) {
+				$result["authSecret"] = $option["value"];
 			}
 		}
 
@@ -125,29 +137,66 @@ class WebPushTransport extends Transport {
 	}
 
 	public function validateOptions($options): array {
-		['pushResource' => $pushResource] = $this->parseOptions($options);
+		[
+			"pushResource" => $pushResource,
+			"clientPublicKeyType" => $clientPublicKeyType,
+			"clientPublicKey" => $clientPublicKey,
+			"authSecret" => $authSecret,
+		] = $this->parseOptions($options);
 
-		if(isset($pushResource) && $this->validPushResource($pushResource)) {
-			return [
-				'valid' => True,
-				'errors' => [],
-			];
-		} else {
-			return [
-				'valid' => False,
-				'errors' => ["push resource not provided"]
-			];
+		$valid = True;
+
+		$errors = [];
+
+		if(!(isset($pushResource) && $this->validPushResource($pushResource))) {
+			$valid = False;
+			$errors[] = ["push resource not provided"];
 		}
+
+		if(!(isset($clientPublicKeyType) && $this->validClientPublicKeyType($clientPublicKeyType))) {
+			$valid = False;
+			$errors[] = ["invalid client public key type"];
+		}
+
+		if(!isset($clientPublicKey) || $clientPublicKey == "") {
+			$valid = False;
+			$errors[] = ["invalid client public key"];
+		}
+
+		if(!isset($authSecret) || $authSecret == "") {
+			$valid = False;
+			$errors[] = ["invalid auth secret"];
+		}
+
+		return [
+			"valid" => $valid,
+			"errors" => $errors,
+		];
 	}
 
 	private function validPushResource(string $url): bool {
 		return (str_starts_with($url, 'https://') && filter_var($url, FILTER_VALIDATE_URL) !== false);
 	}
 
-	public function registerSubscription($subsciptionId, $options) {
-		['pushResource' => $pushResource] = $this->parseOptions($options);
+	private function validClientPublicKeyType(string $type) {
+		return in_array($type, self::VALID_CLIENT_PUBLIC_KEY_TYPES);
+	}
 
-		$this->webPushSubscriptionService->create($subsciptionId, $pushResource);
+	public function registerSubscription($subsciptionId, $options) {
+		[
+			"pushResource" => $pushResource,
+			"clientPublicKeyType" => $clientPublicKeyType,
+			"clientPublicKey" => $clientPublicKey,
+			"authSecret" => $authSecret,
+		] = $this->parseOptions($options);
+
+		$this->webPushSubscriptionService->create(
+			$subsciptionId,
+			$pushResource,
+			$clientPublicKeyType,
+			$clientPublicKey,
+			$authSecret,
+		);
 
 		return [
 			'success' => True,
@@ -171,7 +220,7 @@ class WebPushTransport extends Transport {
 	public function notify(int $subscriptionId, string $userId, string $resourceType, int $resourceId, ?string $syncToken) {
 		$xmlService = new Service();
 
-		$pushResource = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId)->getPushResource();
+		$webPushSubscription = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId);
 
 		$props = [];
 
@@ -189,19 +238,35 @@ class WebPushTransport extends Transport {
 			],
 		]);
 
-		$options = [
-			'http' => [
-				'method' => 'POST',
-				'content' => $content,
-				'header' => [
-					'Content-Type: application/xml; charset="UTF-8"',
-					'Topic: ' . $this->base64url_encode(sha1($topic, true)),
-				],
+		$webPushAuth = [
+			'VAPID' => [
+				'subject' => $this->URLGenerator->getBaseUrl(),
+				'publicKey' => $this->getVapidPublicKey(),
+				'privateKey' => $this->getVapidPrivateKey(),
 			],
 		];
 
-		$context = stream_context_create($options);
-		$result = file_get_contents($pushResource, false, $context);
+		// TODO: improve performance, by reusing over multiple notify() calls
+		$webPush = new WebPush($webPushAuth);
+
+		$report = $webPush->sendOneNotification(
+			Subscription::create([
+            	"endpoint" => $webPushSubscription->getPushResource(),
+				"keys" => [
+					"p256dh" => $webPushSubscription->getClientPublicKey(),
+					"auth" => $webPushSubscription->getAuthSecret(),
+				],
+				"contentEncoding" => "aes128gcm", // should not be hardcoded, this is another property the DAV Client should send on registration
+			]),
+			$content,
+			[
+				"topic" => $this->base64url_encode(sha1($topic, true)),
+			],
+		);
+
+		if (!$report->isSuccess()) {
+			throw new RuntimeException($report->getReason());
+		}
 	}
 
 	public function getSubscriptionIdFromOptions(string $userId, string $resourceType, int $resourceId, $options): ?int {
