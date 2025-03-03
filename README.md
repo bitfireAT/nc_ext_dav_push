@@ -10,7 +10,7 @@ Watch the video (YouTube):
 
 # Nextcloud extension for WebDAV-Push
 
-`nc_ext_dav_push` is a [Nextcloud](https://github.com/nextcloud/server) extension to demonstrate [WebDAV-Push](https://github.com/bitfireAT/webdav-push/) support on calendars (address books are not supported yet).
+`nc_ext_dav_push` is a [Nextcloud](https://github.com/nextcloud/server) extension to demonstrate [WebDAV-Push](https://github.com/bitfireAT/webdav-push/) support on calendars and addressbooks.
 
 It is the server part of our efforts to draft a WebDAV-Push standard and provide a working implementation (server + client) in order to demonstrate it.
 
