@@ -224,20 +224,16 @@ class WebPushTransport extends Transport {
 
 		$webPushSubscription = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId);
 
-		$props = [];
-
 		$topic = $resourceType . "-" . $resourceId;
 
-		$props[PushSpec::PROPERTY_TOPIC] = $topic;
-
-		if(isset($syncToken)) {
-			$props["{DAV:}sync-token"] = $syncToken;
+		$contentUpdate = [];
+		if (isset($syncToken)) {
+			$contentUpdate["{DAV:}sync-token"] = $syncToken;
 		}
 
 		$content = $xmlService->write(PushSpec::PUSH_MESSAGE, [
-			'{DAV:}propstat' => [
-				'{DAV:}prop' => $props,
-			],
+			PushSpec::PROPERTY_TOPIC => $topic,
+			PushSpec::PUSH_CONTENT_UPDATE => $contentUpdate
 		]);
 
 		$webPushAuth = [

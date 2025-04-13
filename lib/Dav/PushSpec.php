@@ -27,6 +27,7 @@ abstract class PushSpec {
 	public const PUSH_PREFIX = '{https://bitfire.at/webdav-push}';
 
 	public const PUSH_MESSAGE = self::PUSH_PREFIX . 'push-message';
+	public const PUSH_CONTENT_UPDATE = self::PUSH_PREFIX . 'content-update';
 
 	public const PROPERTY_PUSH_RESOURCE = self::PUSH_PREFIX . 'push-resource';
 	public const PROPERTY_CLIENT_PUBLIC_KEY = self::PUSH_PREFIX . 'subscription-public-key';
