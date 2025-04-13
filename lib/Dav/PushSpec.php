@@ -29,9 +29,10 @@ abstract class PushSpec {
 	public const PUSH_MESSAGE = self::PUSH_PREFIX . 'push-message';
 
 	public const PROPERTY_PUSH_RESOURCE = self::PUSH_PREFIX . 'push-resource';
-	public const PROPERTY_CLIENT_PUBLIC_KEY = self::PUSH_PREFIX . 'client-public-key';
+	public const PROPERTY_CLIENT_PUBLIC_KEY = self::PUSH_PREFIX . 'subscription-public-key';
 	public const PROPERTY_AUTH_SECRET = self::PUSH_PREFIX . 'auth-secret';
 	public const PROPERTY_TOPIC = self::PUSH_PREFIX . 'topic';
 	public const PROPERTY_TRANSPORTS = self::PUSH_PREFIX . 'transports';
+	public const PROPERTY_VAPID_PUBLIC_KEY = self::PUSH_PREFIX . 'vapid-public-key';
 
 }

@@ -56,7 +56,7 @@ class WebPushTransport extends Transport {
 
 	public function getAdditionalInformation() {
 		return [
-			"server-public-key" => $this->getVapidPublicKey(),
+			PushSpec::PROPERTY_VAPID_PUBLIC_KEY => $this->getVapidPublicKey(),
 		];
 	}
 
