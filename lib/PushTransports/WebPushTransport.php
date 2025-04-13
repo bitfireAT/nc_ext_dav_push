@@ -40,6 +40,7 @@ use OCA\DavPush\Vendor\Minishlink\WebPush\WebPush;
 use OCA\DavPush\Vendor\Minishlink\WebPush\VAPID;
 use OCA\DavPush\Vendor\Minishlink\WebPush\Subscription;
 use RuntimeException;
+use Psr\Log\LoggerInterface;
 
 class WebPushTransport extends Transport {
 	private const VALID_CLIENT_PUBLIC_KEY_TYPES = ["p256dh"];
@@ -50,6 +51,7 @@ class WebPushTransport extends Transport {
 		private readonly WebPushSubscriptionService $webPushSubscriptionService,
 		private readonly IAppConfig $appConfig,
 		private readonly IURLGenerator $URLGenerator,
+		private readonly LoggerInterface $logger,
 	) {}
 
 	public function getAdditionalInformation() {
@@ -263,6 +265,12 @@ class WebPushTransport extends Transport {
 				"topic" => $this->base64url_encode(sha1($topic, true)),
 			],
 		);
+
+		$this->logger->debug(json_encode([
+			"isSuccess" => $report->isSuccess(),
+			"request" => $report->getRequest()->getRequestTarget(),
+			"response" => $report->getResponse()->getStatusCode(),
+		]));
 
 		if (!$report->isSuccess()) {
 			throw new RuntimeException($report->getReason());
