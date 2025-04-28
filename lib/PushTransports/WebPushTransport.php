@@ -40,6 +40,7 @@ use OCA\DavPush\Vendor\Minishlink\WebPush\WebPush;
 use OCA\DavPush\Vendor\Minishlink\WebPush\VAPID;
 use OCA\DavPush\Vendor\Minishlink\WebPush\Subscription;
 use RuntimeException;
+use Psr\Log\LoggerInterface;
 
 class WebPushTransport extends Transport {
 	private const VALID_CLIENT_PUBLIC_KEY_TYPES = ["p256dh"];
@@ -50,11 +51,12 @@ class WebPushTransport extends Transport {
 		private readonly WebPushSubscriptionService $webPushSubscriptionService,
 		private readonly IAppConfig $appConfig,
 		private readonly IURLGenerator $URLGenerator,
+		private readonly LoggerInterface $logger,
 	) {}
 
 	public function getAdditionalInformation() {
 		return [
-			"server-public-key" => $this->getVapidPublicKey(),
+			PushSpec::PROPERTY_VAPID_PUBLIC_KEY => $this->getVapidPublicKey(),
 		];
 	}
 
@@ -222,20 +224,16 @@ class WebPushTransport extends Transport {
 
 		$webPushSubscription = $this->webPushSubscriptionService->findBySubscriptionId($subscriptionId);
 
-		$props = [];
-
 		$topic = $resourceType . "-" . $resourceId;
 
-		$props[PushSpec::PROPERTY_TOPIC] = $topic;
-
-		if(isset($syncToken)) {
-			$props["{DAV:}sync-token"] = $syncToken;
+		$contentUpdate = [];
+		if (isset($syncToken)) {
+			$contentUpdate["{DAV:}sync-token"] = $syncToken;
 		}
 
 		$content = $xmlService->write(PushSpec::PUSH_MESSAGE, [
-			'{DAV:}propstat' => [
-				'{DAV:}prop' => $props,
-			],
+			PushSpec::PROPERTY_TOPIC => $topic,
+			PushSpec::PUSH_CONTENT_UPDATE => $contentUpdate
 		]);
 
 		$webPushAuth = [
@@ -263,6 +261,12 @@ class WebPushTransport extends Transport {
 				"topic" => $this->base64url_encode(sha1($topic, true)),
 			],
 		);
+
+		$this->logger->debug(json_encode([
+			"isSuccess" => $report->isSuccess(),
+			"request" => $report->getRequest()->getRequestTarget(),
+			"response" => $report->getResponse()->getStatusCode(),
+		]));
 
 		if (!$report->isSuccess()) {
 			throw new RuntimeException($report->getReason());
