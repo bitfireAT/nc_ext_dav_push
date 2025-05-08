@@ -58,32 +58,57 @@ class ResourceListener implements IEventListener {
 	) {}
 
 	public function handle(Event $event): void {
+		// FIXME This should probably not work like this!
+        // I think the Nextcloud request should be used, but we have to get it from somewhere if it exists
+        // (because we're in an event callback here).
+        $dontNotifySubscriptions = [];
+		$dontNotifyValue = $_SERVER["HTTP_PUSH_DONT_NOTIFY"];   // header name: "Push-Dont-Notify"
+		if (isset($dontNotifyValue)) {
+			// TODO Correctly process quoted-string (can be multiple values)
+			// For demo purposes, only surrounding quotes are stripped
+			$dontNotifyUrl = trim($dontNotifyValue, " \"");
+
+            // TODO Correctly process URL
+            // For demo purposes, we only extract the subscription ID
+            if (preg_match("/\/subscriptions\/(\d+)$/", $dontNotifyUrl, $matches) === 1) {
+                $ignoreSubscriptionId = $matches[0];
+                $dontNotifySubscriptions[] = $ignoreSubscriptionId;
+            }
+		}
+        if (!empty($dontNotifySubscriptions)) {
+            $this->logger->debug("Skipping push subscriptions: " . join(", ", $dontNotifySubscriptions));
+        }
+
 		if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
 			($event instanceOf CalendarObjectUpdatedEvent) || ($event instanceOf CalendarObjectMovedToTrashEvent) ||
 			($event instanceOf CalendarObjectRestoredEvent)) {
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getCalendarId(), $event->getCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getCalendarId(), $event->getCalendarData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 		
 		if($event instanceOf CalendarObjectMovedEvent) {
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getSourceCalendarId(), $event->getSourceCalendarData()['{http://sabredav.org/ns}sync-token']);
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getTargetCalendarId(), $event->getTargetCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getSourceCalendarId(), $event->getSourceCalendarData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getTargetCalendarId(), $event->getTargetCalendarData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 
 		if (($event instanceOf CardCreatedEvent) || ($event instanceOf CardUpdatedEvent) || ($event instanceOf CardDeletedEvent)) {
-			$this->notifyAllSubscriptionsToResource("addressbook", $event->getAddressBookId(), $event->getAddressBookData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getAddressBookId(), $event->getAddressBookData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 
 		if($event instanceOf CardMovedEvent) {
-			$this->notifyAllSubscriptionsToResource("addressbook", $event->getSourceAddressBookId(), $event->getSourceAddressBookData()['{http://sabredav.org/ns}sync-token']);
-			$this->notifyAllSubscriptionsToResource("addressbook", $event->getTargetAddressBookId(), $event->getTargetAddressBookData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getSourceAddressBookId(), $event->getSourceAddressBookData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getTargetAddressBookId(), $event->getTargetAddressBookData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 	}
 
-	private function notifyAllSubscriptionsToResource(string $resourceType, int $resourceId, string $syncToken): void {
+	private function notifyAllSubscriptionsToResource(string $resourceType, int $resourceId, string $syncToken, array $ignoreNotificationIds): void {
 		$subscriptions = $this->subscriptionService->findAll($resourceType, $resourceId);
 
-		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $resourceType, $resourceId, $syncToken) {
+		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $resourceType, $resourceId, $syncToken, $ignoreNotificationIds) {
 			foreach($subscriptions as $subscription) {
+				// Check whether this subscription should be ignored
+				if (in_array($subscription->id, $ignoreNotificationIds))
+                    continue;
+
 				// TODO: The subscription was able to be registered and has not expired yet, that means the user had access to the resource as of recently,
 				//        but we need to check if that is actually still the case here
 
