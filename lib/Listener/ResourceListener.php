@@ -62,21 +62,21 @@ class ResourceListener implements IEventListener {
         // I think the Nextcloud request should be used, but we have to get it from somewhere if it exists
         // (because we're in an event callback here).
         $dontNotifySubscriptions = [];
-		$dontNotifyValue = $_SERVER["HTTP_PUSH_DONT_NOTIFY"];   // header name: "Push-Dont-Notify"
-		if (isset($dontNotifyValue)) {
+		$dontNotifyName = "HTTP_PUSH_DONT_NOTIFY";   // header name: "Push-Dont-Notify"
+		if (isset($_SERVER[$dontNotifyName])) {
 			// TODO Correctly process quoted-string (can be multiple values)
 			// For demo purposes, only surrounding quotes are stripped
-			$dontNotifyUrl = trim($dontNotifyValue, " \"");
+			$dontNotifyUrl = trim($_SERVER[$dontNotifyName], " \"");
 
             // TODO Correctly process URL
             // For demo purposes, we only extract the subscription ID
             if (preg_match("/\/subscriptions\/(\d+)$/", $dontNotifyUrl, $matches) === 1) {
-                $ignoreSubscriptionId = $matches[0];
+                $ignoreSubscriptionId = $matches[1];
                 $dontNotifySubscriptions[] = $ignoreSubscriptionId;
             }
 		}
         if (!empty($dontNotifySubscriptions)) {
-            $this->logger->debug("Skipping push subscriptions: " . join(", ", $dontNotifySubscriptions));
+            $this->logger->info("Skipping push subscriptions: " . join(", ", $dontNotifySubscriptions));
         }
 
 		if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
