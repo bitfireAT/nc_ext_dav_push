@@ -28,6 +28,8 @@ namespace OCA\DavPush\Listener;
 use OCP\IConfig;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\IRequest;
+use OCP\IURLGenerator;
 
 use OCA\DAV\Events\CalendarObjectCreatedEvent;
 use OCA\DAV\Events\CalendarObjectMovedToTrashEvent;
@@ -42,6 +44,7 @@ use OCA\DAV\Events\CardDeletedEvent;
 use OCA\DAV\Events\CardMovedEvent;
 
 use Psr\Log\LoggerInterface;
+use Psr\Container\ContainerInterface;
 
 use OCA\DavPush\Service\SubscriptionService;
 use OCA\DavPush\Transport\TransportManager;
@@ -54,30 +57,47 @@ class ResourceListener implements IEventListener {
 		private SubscriptionService $subscriptionService,
 		private TransportManager $transportManager,
 		private ErrorHandlingHelper $errorHandlingHelper,
+		private ContainerInterface $container,
+		private IURLGenerator $URLGenerator,
 		private $userId,
 	) {}
 
 	public function handle(Event $event): void {
-		// FIXME This should probably not work like this!
-        // I think the Nextcloud request should be used, but we have to get it from somewhere if it exists
-        // (because we're in an event callback here).
-        $dontNotifySubscriptions = [];
-		$dontNotifyName = "HTTP_PUSH_DONT_NOTIFY";   // header name: "Push-Dont-Notify"
-		if (isset($_SERVER[$dontNotifyName])) {
-			// TODO Correctly process quoted-string (can be multiple values)
-			// For demo purposes, only surrounding quotes are stripped
-			$dontNotifyUrl = trim($_SERVER[$dontNotifyName], " \"");
+		$dontNotifySubscriptions = [];
 
-            // TODO Correctly process URL
-            // For demo purposes, we only extract the subscription ID
-            if (preg_match("/\/subscriptions\/(\d+)$/", $dontNotifyUrl, $matches) === 1) {
-                $ignoreSubscriptionId = $matches[1];
-                $dontNotifySubscriptions[] = $ignoreSubscriptionId;
-            }
+		try {
+			$request = $this->container->get(IRequest::class);
+
+			if (isset($request)) {
+				$urlPrefix = $this->URLGenerator->getAbsoluteURL("/apps/dav_push/subscriptions/");
+
+				$dontNotifyHeader = $request->getHeader("Push-Dont-Notify");
+
+				$dontNotifyUrls = explode($dontNotifyHeader, ",");
+
+				foreach($dontNotifyUrls as $dontNotifyUrl) {
+					$dontNotifyUrlTrimmed = trim($dontNotifyUrl, " \"");
+
+					if($dontNotifyUrlTrimmed === "*") {
+						// no notifications need to be sent out
+						$this->logger->info("Skipping all push subscriptions");
+						return;
+					} else if(str_starts_with($dontNotifyUrlTrimmed, $urlPrefix)) {
+						$ignoreSubscriptionId = substr($dontNotifyUrlTrimmed, strlen($urlPrefix));
+
+						if(ctype_digit($ignoreSubscriptionId)) {
+							$dontNotifySubscriptions[] = (int) $ignoreSubscriptionId;
+						}
+					}
+				}
+			}
+		} catch (\Throwable $e) {
+			$dontNotifySubscriptions = [];
+		}		
+		
+		if (!empty($dontNotifySubscriptions)) {
+			$this->logger->info("Skipping push subscriptions: " . join(", ", $dontNotifySubscriptions));
 		}
-        if (!empty($dontNotifySubscriptions)) {
-            $this->logger->info("Skipping push subscriptions: " . join(", ", $dontNotifySubscriptions));
-        }
 
 		if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
 			($event instanceOf CalendarObjectUpdatedEvent) || ($event instanceOf CalendarObjectMovedToTrashEvent) ||
@@ -106,8 +126,9 @@ class ResourceListener implements IEventListener {
 		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $resourceType, $resourceId, $syncToken, $ignoreNotificationIds) {
 			foreach($subscriptions as $subscription) {
 				// Check whether this subscription should be ignored
-				if (in_array($subscription->id, $ignoreNotificationIds))
-                    continue;
+				if (in_array($subscription->getId(), $ignoreNotificationIds)) {
+					continue;
+				}
 
 				// TODO: The subscription was able to be registered and has not expired yet, that means the user had access to the resource as of recently,
 				//        but we need to check if that is actually still the case here

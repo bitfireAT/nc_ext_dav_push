@@ -3,3 +3,4 @@ composer.phar
 /vendor/
 /vendor-bin/**/vendor/
 build/artifacts
+.idea/
