@@ -6,11 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.3] - 2025-06-11
 
 ### Added
-* Added support for VAPID
-* Added push message encryption
-* Added support for `Push-Dont-Notify` header
-* Added support for addressbooks
-* Added support for shared calendars
+- Added support for VAPID
+- Added push message encryption
+- Added support for `Push-Dont-Notify` header
+- Added support for addressbooks
+- Added support for shared calendars
+- Added support for Nextcloud 31
+
+### Removed
+- Removed support for Nextcloud 28 and 29
 
 ### Changed
 - It is now highly recommended to install either the GMP or the BCMath php extension to speed up cryptography calculations for the new encryption support
