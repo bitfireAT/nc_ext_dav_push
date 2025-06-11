@@ -11,3 +11,4 @@ screenshots
 .vscode
 /vendor/bin
 /vendor-bin
+renovate.json
