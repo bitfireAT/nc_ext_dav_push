@@ -28,6 +28,8 @@ namespace OCA\DavPush\Listener;
 use OCP\IConfig;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\IRequest;
+use OCP\IURLGenerator;
 
 use OCA\DAV\Events\CalendarObjectCreatedEvent;
 use OCA\DAV\Events\CalendarObjectMovedToTrashEvent;
@@ -42,6 +44,7 @@ use OCA\DAV\Events\CardDeletedEvent;
 use OCA\DAV\Events\CardMovedEvent;
 
 use Psr\Log\LoggerInterface;
+use Psr\Container\ContainerInterface;
 
 use OCA\DavPush\Service\SubscriptionService;
 use OCA\DavPush\Transport\TransportManager;
@@ -54,36 +57,83 @@ class ResourceListener implements IEventListener {
 		private SubscriptionService $subscriptionService,
 		private TransportManager $transportManager,
 		private ErrorHandlingHelper $errorHandlingHelper,
+		private ContainerInterface $container,
+		private IURLGenerator $URLGenerator,
 		private $userId,
 	) {}
 
 	public function handle(Event $event): void {
+		$dontNotifySubscriptions = [];
+
+		try {
+			$request = $this->container->get(IRequest::class);
+
+			if (isset($request)) {
+				$urlPrefix = $this->URLGenerator->getAbsoluteURL("/apps/dav_push/subscriptions/");
+
+				$dontNotifyHeader = $request->getHeader("Push-Dont-Notify");
+
+				$dontNotifyUrls = explode(",", $dontNotifyHeader);
+
+				foreach($dontNotifyUrls as $dontNotifyUrl) {
+					$dontNotifyUrlTrimmed = trim($dontNotifyUrl, " \"");
+
+					if($dontNotifyUrlTrimmed === "*") {
+						// no notifications need to be sent out
+						$this->logger->info("Skipping all push subscriptions");
+						return;
+					} else if(str_starts_with($dontNotifyUrlTrimmed, $urlPrefix)) {
+						$ignoreSubscriptionId = substr($dontNotifyUrlTrimmed, strlen($urlPrefix));
+
+						if(ctype_digit($ignoreSubscriptionId)) {
+							$dontNotifySubscriptions[] = (int) $ignoreSubscriptionId;
+						} else {
+							$this->logger->info("Invalid Push-Dont-Notify url " . json_encode($dontNotifyUrlTrimmed));
+						}
+					} else if ($dontNotifyUrlTrimmed !== "") {
+						$this->logger->info("Invalid Push-Dont-Notify url " . json_encode($dontNotifyUrlTrimmed));
+					}
+				}
+			}
+		} catch (\Throwable $e) {
+			$dontNotifySubscriptions = [];
+		}		
+		
+		if (!empty($dontNotifySubscriptions)) {
+			$this->logger->info("Skipping push subscriptions: " . join(", ", $dontNotifySubscriptions));
+		}
+
 		if (($event instanceOf CalendarObjectCreatedEvent) || ($event instanceOf CalendarObjectDeletedEvent) ||
 			($event instanceOf CalendarObjectUpdatedEvent) || ($event instanceOf CalendarObjectMovedToTrashEvent) ||
 			($event instanceOf CalendarObjectRestoredEvent)) {
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getCalendarId(), $event->getCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getCalendarId(), $event->getCalendarData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 		
 		if($event instanceOf CalendarObjectMovedEvent) {
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getSourceCalendarId(), $event->getSourceCalendarData()['{http://sabredav.org/ns}sync-token']);
-			$this->notifyAllSubscriptionsToResource("calendar", $event->getTargetCalendarId(), $event->getTargetCalendarData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getSourceCalendarId(), $event->getSourceCalendarData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
+			$this->notifyAllSubscriptionsToResource("calendar", $event->getTargetCalendarId(), $event->getTargetCalendarData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 
 		if (($event instanceOf CardCreatedEvent) || ($event instanceOf CardUpdatedEvent) || ($event instanceOf CardDeletedEvent)) {
-			$this->notifyAllSubscriptionsToResource("addressbook", $event->getAddressBookId(), $event->getAddressBookData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getAddressBookId(), $event->getAddressBookData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 
 		if($event instanceOf CardMovedEvent) {
-			$this->notifyAllSubscriptionsToResource("addressbook", $event->getSourceAddressBookId(), $event->getSourceAddressBookData()['{http://sabredav.org/ns}sync-token']);
-			$this->notifyAllSubscriptionsToResource("addressbook", $event->getTargetAddressBookId(), $event->getTargetAddressBookData()['{http://sabredav.org/ns}sync-token']);
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getSourceAddressBookId(), $event->getSourceAddressBookData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
+			$this->notifyAllSubscriptionsToResource("addressbook", $event->getTargetAddressBookId(), $event->getTargetAddressBookData()['{http://sabredav.org/ns}sync-token'], $dontNotifySubscriptions);
 		}
 	}
 
-	private function notifyAllSubscriptionsToResource(string $resourceType, int $resourceId, string $syncToken): void {
+	private function notifyAllSubscriptionsToResource(string $resourceType, int $resourceId, string $syncToken, array $ignoreNotificationIds): void {
 		$subscriptions = $this->subscriptionService->findAll($resourceType, $resourceId);
 
-		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $resourceType, $resourceId, $syncToken) {
+		$this->errorHandlingHelper->convertErrorsToExceptions(function () use ($subscriptions, $resourceType, $resourceId, $syncToken, $ignoreNotificationIds) {
 			foreach($subscriptions as $subscription) {
+				// Check whether this subscription should be ignored
+				if (in_array($subscription->getId(), $ignoreNotificationIds)) {
+					continue;
+				}
+
 				// TODO: The subscription was able to be registered and has not expired yet, that means the user had access to the resource as of recently,
 				//        but we need to check if that is actually still the case here
 

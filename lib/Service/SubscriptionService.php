@@ -18,6 +18,11 @@ class SubscriptionService {
 	) {
 	}
 
+	/**
+	 * @param string resourceType
+	 * @param int resourceId
+	 * @return Subscription[]
+	 */
 	public function findAll(string $resourceType, int $resourceId): array {
 		return $this->mapper->findAll($resourceType, $resourceId);
 	}
