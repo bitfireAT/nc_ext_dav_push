@@ -56,7 +56,8 @@ For more details see the [apps management section of the nextcloud docs](https:/
 
 ## Latest development version
 - It is highly recommended to install either the GMP or the BCMath php extension to speed up cryptography calculations
-- Clone this repository into your apps directory (currently no build step is required, this may change in the future)
+- Clone this repository into your apps directory
+- Run `composer install -o` in the repository directory
 - Open App Store of your Nextcloud instance
 - Search for "DAV Push"
 - Click enable button
