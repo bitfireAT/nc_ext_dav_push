@@ -88,7 +88,7 @@ class ResourceListener implements IEventListener {
 						if(ctype_digit($ignoreSubscriptionId)) {
 							$dontNotifySubscriptions[] = (int) $ignoreSubscriptionId;
 						}
-					} else {
+					} else if ($dontNotifyUrlTrimmed !== "") {
 						$this->logger->info("Invalid Push-Dont-Notify url " . json_encode($dontNotifyUrlTrimmed));
 					}
 				}
