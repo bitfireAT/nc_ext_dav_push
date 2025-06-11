@@ -1,4 +1,8 @@
 [package]
 before_cmds = [
-    "composer install --no-dev -o",
+    "composer install -o --no-scripts",
+    "composer bin all install",
+    "composer install -o --no-dev --no-scripts", #dev dependencies are no longer needed
+    "vendor/bin/mozart compose",
+    "composer dump-autoload"
 ]
