@@ -73,7 +73,7 @@ class ResourceListener implements IEventListener {
 
 				$dontNotifyHeader = $request->getHeader("Push-Dont-Notify");
 
-				$dontNotifyUrls = explode($dontNotifyHeader, ",");
+				$dontNotifyUrls = explode(",", $dontNotifyHeader);
 
 				foreach($dontNotifyUrls as $dontNotifyUrl) {
 					$dontNotifyUrlTrimmed = trim($dontNotifyUrl, " \"");
@@ -88,6 +88,8 @@ class ResourceListener implements IEventListener {
 						if(ctype_digit($ignoreSubscriptionId)) {
 							$dontNotifySubscriptions[] = (int) $ignoreSubscriptionId;
 						}
+					} else {
+						$this->logger->info("Invalid Push-Dont-Notify url " . json_encode($dontNotifyUrlTrimmed));
 					}
 				}
 			}
