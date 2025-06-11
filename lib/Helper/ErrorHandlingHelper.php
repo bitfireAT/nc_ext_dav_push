@@ -2,13 +2,25 @@
 
 namespace OCA\DavPush\Helper;
 
+use Psr\Log\LoggerInterface;
+
 class ErrorHandlingHelper {
+
+	public function __construct(
+		private LoggerInterface $logger,
+	) {}
 
     // convert php errors to exceptions to be able to catch them
     function convertErrorsToExceptions(callable $fn) {
 		set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) {
 			if (!(error_reporting() & $errno)) {
 				// This error code is not included in error_reporting.
+				return;
+			}
+
+			if($errno === E_USER_NOTICE) {
+				// Don't throw for notices, only log
+				$this->logger->notice($errstr);
 				return;
 			}
 		
