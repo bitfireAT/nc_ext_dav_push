@@ -143,7 +143,7 @@ class ResourceListener implements IEventListener {
 					$transport->notify($subscription->getId(), $subscription->getUserId(), $resourceType, $resourceId, $syncToken);
 					$this->subscriptionService->update($subscription->getUserId(), $subscription->getId(), failCounter: 0);
 				} catch (\Throwable $e) {
-					$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId() . ". error message: " . $e->getMessage());
+					$this->logger->error("transport " .  $subscription->getTransport() . " failed to deliver notification to subscription " . $subscription->getId() . ". error message: " . $e->getMessage() . " thrown in " . $e->getFile() . ":" . $e->getLine());
 					$this->subscriptionService->update($subscription->getUserId(), $subscription->getId(), failCounter: $subscription->getFailCounter() + 1);
 				}
 			}
