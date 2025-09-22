@@ -32,6 +32,7 @@ This Nextcloud extension has been developed by [@verdigado](https://github.com/v
         <database>sqlite</database>
         <database>mysql</database>
         <nextcloud min-version="30" max-version="31"/>
+        <php min-version="8.1" />
     </dependencies>
     <background-jobs>
         <job>OCA\DavPush\BackgroundJob\SubscriptionsCleanup</job>
