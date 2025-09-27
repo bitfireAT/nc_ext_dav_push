@@ -11,10 +11,12 @@ use OCA\DavPush\Errors\SubscriptionNotFound;
 
 use OCA\DavPush\Db\Subscription;
 use OCA\DavPush\Db\SubscriptionMapper;
+use OCA\DavPush\Transport\TransportManager;
 
 class SubscriptionService {
 	public function __construct(
-		private SubscriptionMapper $mapper
+		private SubscriptionMapper $mapper,
+		private TransportManager $transportManager,
 	) {
 	}
 
@@ -89,8 +91,29 @@ class SubscriptionService {
 		}
 	}
 
-	/** remove all subscriptions, that are expired or have failed to deliver notifications too often */
-	public function cleanupAll(): int {
-		return $this->mapper->cleanupAll();
+	/** remove all subscriptions, that are expired or have failed to deliver notifications too often
+	 * @param bool $batched clean up only one batch so the function call does not take too long if many expired/failing subscriptions exist (used in background jobs, that run periodically)
+	 * @return int number of deleted subscriptions
+	*/
+	public function cleanup(bool $batched = false): int {
+		if($batched) {
+			$limit = 100;
+		} else {
+			$limit = null;
+		}
+
+		$subscriptions = $this->mapper->findAllToCleanUp(limit: $limit);
+
+		foreach($subscriptions as $subscription) {
+			$transport = $this->transportManager->getTransport($subscription->getTransport());
+
+			if(!is_null($transport)) {
+				$transport->deleteSubscription($subscription->getId());
+			}
+
+			$this->mapper->delete($subscription);
+		}
+
+		return count($subscriptions);
 	}
 }

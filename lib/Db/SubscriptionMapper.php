@@ -67,20 +67,24 @@ class SubscriptionMapper extends QBMapper {
 
 	/**
 	 * @param int $maxFails maximum number of successive subscription notification delivery failures still considered acceptable
-	 * @return int number of deleted subscriptions
+	 * @param ?int $limit
+	 * @return Subscription[]
 	 */
-	public function cleanupAll(int $maxFails = 3): int {
+	public function findAllToCleanUp(int $maxFails = 5, ?int $limit = null): array {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 
-		$qb->delete(self::TABLENAME)
+		$qb->select('*')
+			->from(self::TABLENAME)
 			->where($qb->expr()->orX(
 				$qb->expr()->gt('fail_counter', $qb->createNamedParameter($maxFails, IQueryBuilder::PARAM_INT)),
 				$qb->expr()->lt('expiration_timestamp', $qb->createNamedParameter(time(), IQueryBuilder::PARAM_INT)),
 			));
 
-		// TODO: call transport deleteSubscription
+		if(isset($limit)) {
+			$qb->setMaxResults($limit);
+		}
 		
-		return $qb->executeStatement();
+		return $this->findEntities($qb);
 	}
 }

@@ -54,7 +54,7 @@ class TransportManager {
 	}
 
 	/**
-	 * @return Transport
+	 * @return ?Transport
 	 */
 	public function getTransport($id): ?Transport {
 		return $this->transports[$id];

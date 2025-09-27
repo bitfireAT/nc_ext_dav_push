@@ -19,9 +19,9 @@ class SubscriptionsCleanup extends BaseCommand {
 
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		try {
-			$result = $this->subscriptionService->cleanupAll();
+			$result = $this->subscriptionService->cleanup();
 
-            $output->writeln("done. deleted " . $result . " subscriptions");
+			$output->writeln("done. deleted " . $result . " expired or failing subscriptions");
 
 			return 0;
 		} catch (Exception $e) {
