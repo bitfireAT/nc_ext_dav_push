@@ -15,12 +15,12 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 
 use OCA\DAV\Events\SabrePluginAddEvent;
 
-use OCA\DAV\Events\CalendarObjectCreatedEvent;
-use OCA\DAV\Events\CalendarObjectMovedToTrashEvent;
-use OCA\DAV\Events\CalendarObjectRestoredEvent;
-use OCA\DAV\Events\CalendarObjectDeletedEvent;
-use OCA\DAV\Events\CalendarObjectUpdatedEvent;
-use OCA\DAV\Events\CalendarObjectMovedEvent;
+use OCP\Calendar\Events\CalendarObjectCreatedEvent;
+use OCP\Calendar\Events\CalendarObjectMovedToTrashEvent;
+use OCP\Calendar\Events\CalendarObjectRestoredEvent;
+use OCP\Calendar\Events\CalendarObjectDeletedEvent;
+use OCP\Calendar\Events\CalendarObjectUpdatedEvent;
+use OCP\Calendar\Events\CalendarObjectMovedEvent;
 
 use OCA\DAV\Events\CardCreatedEvent;
 use OCA\DAV\Events\CardUpdatedEvent;
