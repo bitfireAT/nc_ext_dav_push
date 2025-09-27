@@ -1,8 +1,5 @@
-![Development stage: alpha](https://img.shields.io/badge/development%20stage-preview-blue)
+![Development stage: stable](https://img.shields.io/badge/development%20stage-stable-blue)
 [![Software License](https://img.shields.io/badge/license-AGPL-brightgreen.svg)](LICENSE)
-
-> [!NOTE]  
-> If you're coming from the Nextcloud Conf 2024 lightning talk, you can find the [slides here](https://cloud.bitfire.at/s/WoPZaEnC9tmNxa6).
 
 Watch the video (YouTube):  
 [![Watch the video](https://img.youtube.com/vi/XQ2jhqbDL6M/hqdefault.jpg)](https://youtu.be/XQ2jhqbDL6M)
@@ -10,15 +7,9 @@ Watch the video (YouTube):
 
 # Nextcloud extension for WebDAV-Push
 
-`nc_ext_dav_push` is a [Nextcloud](https://github.com/nextcloud/server) extension to demonstrate [WebDAV-Push](https://github.com/bitfireAT/webdav-push/) support on calendars and addressbooks.
+`dav_push` is a [Nextcloud](https://github.com/nextcloud/server) extension to demonstrate [WebDAV-Push](https://github.com/bitfireAT/webdav-push/) support on calendars and addressbooks.
 
 It is the server part of our efforts to draft a WebDAV-Push standard and provide a working implementation (server + client) in order to demonstrate it.
-
-> [!WARNING] 
-> This extension is in an early stage of development. It is for demonstration and testing purposes only. Don't use it on production systems!
-
-You can however install/enable the extension to test it and disable or remove it again at any time. When the extension is disabled, it doesn't influence your system.
-
 
 ## About WebDAV-Push
 
@@ -33,7 +24,7 @@ WebDAV-Push, which is currently in development, wants to solve this problem with
 
 The current WebDAV-Push draft is provided by [@bitfireAT](https://github.com/bitfireAT).
 
-This Nextcloud extension has been developed by [@JonathanTreffler](https://github.com/JonathanTreffler) for [@verdigado](https://github.com/verdigado), who are also interested in WebDAV-Push.
+This Nextcloud extension has been developed by [@JonathanTreffler](https://github.com/JonathanTreffler) for [@verdigado](https://github.com/verdigado), who aim to integrate WebDAV-Push support into their Nextcloud hosting solutions.
 
 
 ## Contact
@@ -68,7 +59,7 @@ When you have installed the Nextcloud extension, you need a client that supports
 
 Currently, only DAVx⁵ (≥ 4.4.2) supports WebDAV-Push. To get it working:
 
-1. Install and enable `nc_ext_dav_push` on your server (see above).
+1. Install and enable `dav_push` on your server (see above).
 2. Install DAVx⁵, add your server. If you already have DAVx⁵ configured with your server, choose _Refresh collection list_.
 3. DAVx⁵ should now show _Server advertises Push support_ in the details view for the calendars of this server.
 4. Install a [UnifiedPush distributor](https://unifiedpush.org/users/distributors/) like [ntfy](https://ntfy.sh/).
