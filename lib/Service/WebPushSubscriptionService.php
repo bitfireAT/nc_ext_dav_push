@@ -43,6 +43,22 @@ class WebPushSubscriptionService {
 		}
     }
 
+	/**
+	 * Delete all webpush subscription table entries, that do not have a corresponding entry
+	 * in the main subscriptions table
+	 * (The only known origin for such entries is a bug in alpha versions of the app)
+	 * @return int
+	*/
+	public function deleteOrphanedSubscriptions(): int {
+		$entities = $this->mapper->findOrphanedSubscriptions();
+
+		foreach($entities as $entity) {
+			$this->mapper->delete($entity);
+		}
+
+		return count($entities);
+	}
+
 	public function create(int $subscriptionId, string $pushResource, string $clientPublicKeyType, string $clientPublicKey, string $authSecret): WebPushSubscription {
 		$webPushSubscription = new WebPushSubscription();
 		$webPushSubscription->setSubscriptionId($subscriptionId);

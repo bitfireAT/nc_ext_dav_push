@@ -32,23 +32,33 @@ use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
 
 use OCA\DavPush\Service\SubscriptionService;
+use OCA\DavPush\Service\WebPushSubscriptionService;
 
 class SubscriptionsCleanup extends TimedJob {
-    
-    public function __construct(
-        private LoggerInterface $logger,
-        private SubscriptionService $subscriptionService,
-        ITimeFactory $time
-    ) {
-        parent::__construct($time);
+	
+	public function __construct(
+		private LoggerInterface $logger,
+		private SubscriptionService $subscriptionService,
+		private WebPushSubscriptionService $webPushSubscriptionService,
+		ITimeFactory $time,
+	) {
+		parent::__construct($time);
 
-        // Run once an hour
-        $this->setInterval(3600);
-    }
+		// Run once an hour
+		$this->setInterval(3600);
+	}
 
-    protected function run($arguments) {
-        $result = $this->subscriptionService->cleanupAll();
-        
-        $this->logger->info("DAV Push background job deleted " . $result . " expired/failing subscriptions");
-    }
+	protected function run($arguments) {
+		$result = $this->subscriptionService->cleanup(batched: true);
+		
+		$this->logger->info("DAV Push background job deleted " . $result . " expired/failing subscriptions");
+
+		$result = $this->webPushSubscriptionService->deleteOrphanedSubscriptions();
+
+		if($result > 0) {
+			$this->logger->info(
+				message: "DAV Push background job deleted " . $result . " orphaned web push entries. This should not happen during normal operation!"
+			);
+		}
+	}
 }

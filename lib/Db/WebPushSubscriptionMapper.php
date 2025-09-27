@@ -55,6 +55,23 @@ class WebPushSubscriptionMapper extends QBMapper {
 	}
 
 	/**
+	 * @return WebPushSubscription[]
+	 */
+	public function findOrphanedSubscriptions(): array {
+		/* @var $qb IQueryBuilder */
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('webpush.*')
+			->from(self::TABLENAME, 'webpush');
+
+		$qb->leftJoin('webpush', self::SUBSCRIPTIONS_TABLENAME, 'subscription', $qb->expr()->eq('webpush.subscription_id', 'subscription.id'));
+
+		$qb->where($qb->expr()->isNull('subscription.id'));
+
+		return $this->findEntities($qb);
+	}
+
+	/**
 	 * Deletes an entity from the table
 	 *
 	 * @param WebPushSubscription $entity the entity that should be deleted
