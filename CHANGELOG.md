@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Outbound proxy is now used if configured in nextcloud config.php 
 
 ### Removed
-- Removed support for Nextcloud versions < 31.0.3 (newer versions of 31 are still suported)
+- Removed support for Nextcloud versions < 31.0.3 (newer versions of 31 are still supported)
 
 ### Changed
 - WebPush servers in your local network (local IPs) are no longer allowed unless you have configured your instance to allow local network connections
