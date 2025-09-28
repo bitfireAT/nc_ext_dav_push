@@ -1,6 +1,9 @@
 ![Development stage: stable](https://img.shields.io/badge/development%20stage-stable-blue)
 [![Software License](https://img.shields.io/badge/license-AGPL-brightgreen.svg)](LICENSE)
 
+> [!NOTE]  
+> If you're coming from our Nextcloud Conf 2025 lightning talks, you can find the slides for the first talk [here](https://cloud.bitfire.at/s/NGosHT2NPc2PFjZ) and for the second talk [here](https://nextcloud.fractava.com/s/nc-lightning-talk-2025).
+
 Watch the video (YouTube):  
 [![Watch the video](https://img.youtube.com/vi/XQ2jhqbDL6M/hqdefault.jpg)](https://youtu.be/XQ2jhqbDL6M)
 
