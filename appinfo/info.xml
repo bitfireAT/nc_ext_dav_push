@@ -29,8 +29,8 @@ This Nextcloud extension has been developed by [@verdigado](https://github.com/v
         <database>pgsql</database>
         <database>sqlite</database>
         <database>mysql</database>
-        <nextcloud min-version="31.0.3" max-version="32"/>
-        <php min-version="8.1" />
+        <nextcloud min-version="32" max-version="33"/>
+        <php min-version="8.2" />
     </dependencies>
     <background-jobs>
         <job>OCA\DavPush\BackgroundJob\SubscriptionsCleanup</job>
