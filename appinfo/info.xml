@@ -18,7 +18,7 @@ The current WebDAV-Push draft is provided by [@bitfireAT](https://github.com/bit
           
 This Nextcloud extension has been developed by [@verdigado](https://github.com/verdigado).
     ]]></description>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <licence>agpl</licence>
     <author mail="info@bitfire.at" homepage="https://github.com/bitfireAT/webdav-push">bitfire web engineering</author>
     <author mail="mail@jonathan-treffler.de">Jonathan Treffler</author>
@@ -29,7 +29,7 @@ This Nextcloud extension has been developed by [@verdigado](https://github.com/v
         <database>pgsql</database>
         <database>sqlite</database>
         <database>mysql</database>
-        <nextcloud min-version="32" max-version="33"/>
+        <nextcloud min-version="32" max-version="34"/>
         <php min-version="8.2" />
     </dependencies>
     <background-jobs>
