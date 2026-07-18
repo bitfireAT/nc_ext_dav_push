@@ -46,6 +46,10 @@ class ServiceDetectionPlugin extends ServerPlugin {
 	) {
 	}
 
+	public function getFeatures(): array {
+		return ['webdav-push'];
+	}
+
 	public function initialize(Server $server): void {
 		$server->on('propFind', [$this, 'propFind']);
 	}
@@ -72,9 +76,9 @@ class ServiceDetectionPlugin extends ServerPlugin {
 				//}
 
 				$transports = $this->transportManager->getTransports();
-				
+
 				$result = [];
-				
+
 				foreach($transports as $transport) {
 					$result[] = [
 						(PushSpec::PUSH_PREFIX . $transport->getId()) => $transport->getAdditionalInformation(),
