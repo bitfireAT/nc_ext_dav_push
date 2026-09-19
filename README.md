@@ -63,7 +63,7 @@ When you have installed the Nextcloud extension, you need a client that supports
 Currently, only DAVx⁵ (≥ 4.4.2) supports WebDAV-Push. To get it working:
 
 1. Install and enable `dav_push` on your server (see above).
-2. Install DAVx⁵, add your server. If you already have DAVx⁵ configured with your server, choose _Refresh collection list_.
+2. Install DAVx⁵, add your server. If you already have DAVx⁵ configured with your server, click the red _Refresh list_ button.
 3. DAVx⁵ should now show _Server advertises Push support_ in the details view for the calendars of this server.
 4. Install a [UnifiedPush distributor](https://unifiedpush.org/users/distributors/) like [ntfy](https://ntfy.sh/).
 5. Connect it with DAVx⁵ app settings / _UnifiedPush (experimental)_. Now the subscription should show up in ntfy (if you're using ntfy).
