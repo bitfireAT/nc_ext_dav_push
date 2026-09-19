@@ -4,6 +4,14 @@ The format of this file is based on [Keep a Changelog](https://keepachangelog.co
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.0.3] - 2026-09-19
+
+### Added
+- Added support for Nextcloud v35 ("Hub 26 Summer")
+
+### Removed
+- Removed support for EOL Nextcloud v32
+
 ## [1.0.2] - 2026-06-27
 
 ### Added
