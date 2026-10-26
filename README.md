@@ -56,11 +56,16 @@ For more details see the [apps management section of the nextcloud docs](https:/
 - Search for "DAV Push"
 - Click enable button
 
-## Usage with DAVx⁵
+## Clients
 
-When you have installed the Nextcloud extension, you need a client that supports WebDAV-Push to make use of it.
+When you have installed the Nextcloud extension, you need a client that supports WebDAV-Push to make use of it:
 
-Currently, only DAVx⁵ (≥ 4.4.2) supports WebDAV-Push. To get it working:
+- [DAVx⁵](https://www.davx5.com/) (≥ 4.4.2), Android
+- [Todav](https://github.com/AperteDev/todav), tasks and calendar for GNOME (Linux)
+
+### Usage with DAVx⁵
+
+To get it working:
 
 1. Install and enable `dav_push` on your server (see above).
 2. Install DAVx⁵, add your server. If you already have DAVx⁵ configured with your server, choose _Refresh collection list_.
@@ -71,3 +76,10 @@ Currently, only DAVx⁵ (≥ 4.4.2) supports WebDAV-Push. To get it working:
 7. Whenever a new event is created or an existing event is updated by any client (for instance, in the Nextcloud Calendar), DAVx⁵ should receive a push notification and start a sync very soon (usually a few seconds).
 
 See https://github.com/bitfireAT/davx5-ose/discussions/983 for screenshots.
+
+### Usage with Todav
+
+1. Install and enable `dav_push` on your server (see above).
+2. Add your Nextcloud account in Todav.
+3. Enter your [ntfy](https://ntfy.sh/) server in Preferences > Accounts > Push. Each account's page there shows whether its server advertises Push support and whether push works.
+4. Whenever a task or event is changed by any client, Todav receives a push notification and syncs within seconds.
