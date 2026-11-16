@@ -332,6 +332,9 @@ class WebPushTransport extends Transport {
 			$content,
 			[
 				"topic" => $this->base64url_encode(sha1($topic, true)),
+				// web-push 9.x defaults TTL to an int; guzzlehttp/psr7 >= 2.11
+				// deprecates non-string header values and calls trigger_deprecation()
+				"TTL" => "2419200",
 			],
 		);
 
